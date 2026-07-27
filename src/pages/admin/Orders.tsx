@@ -1,9 +1,8 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/display/card";
+import { Badge } from "@/components/ui/display/badge";
+import { Input } from "@/components/ui/forms/input";
+import { Button } from "@/components/ui/forms/button";
 import { toast } from "sonner";
 import {
   ShoppingCart, Search, User, Calendar, Trash2,

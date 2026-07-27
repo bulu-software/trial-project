@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { products, type Product } from "@/data/products"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/forms/button"
+import { Badge } from "@/components/ui/display/badge"
+import { Separator } from "@/components/ui/display/separator"
 import { 
   ArrowLeft, 
   ShoppingCart, 

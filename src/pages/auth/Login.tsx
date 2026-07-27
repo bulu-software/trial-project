@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Input } from "@/components/ui/forms/input"
+import { Label } from "@/components/ui/forms/label"
+import { Button } from "@/components/ui/forms/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/display/card"
 import { Mail, Lock, Eye, EyeOff, Leaf, ArrowRight } from "lucide-react"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

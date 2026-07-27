@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react"
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/forms/button"
+import { Input } from "@/components/ui/forms/input"
+import { Label } from "@/components/ui/forms/label"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/display/card"
 import { Sprout, ArrowLeft, Mail, CheckCircle2 } from "lucide-react"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

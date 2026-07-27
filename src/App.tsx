@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react"
 import { Routes, Route, useLocation, useNavigate, Link } from "react-router-dom"
 
-import Home from "@/pages/Home"
-import About from "@/pages/about"
-import Contact from "@/pages/contact"
-import Login from "@/pages/login"
-import Register from "@/pages/registration"
-import Footer from "@/components/ui/footer"
-import ProductPage from "./pages/Product"
-import Forgot_password from "./pages/Forgot_password"
-import { Toaster } from "@/components/ui/sonner"
+import Home from "@/pages/public/Home"
+import About from "@/pages/public/About"
+import Contact from "@/pages/public/Contact"
+import Login from "@/pages/auth/Login"
+import Register from "@/pages/auth/Registration"
+import Footer from "@/components/ui/layout/footer"
+import ProductPage from "@/pages/public/Product"
+import Forgot_password from "@/pages/auth/Forgot_password"
+import { Toaster } from "@/components/ui/feedback/sonner"
 import { 
   Home as HomeIcon, 
   LogIn as LogInIcon, 
@@ -22,16 +22,22 @@ import {
   User as UserIcon,
   ChevronDown as ChevronDownIcon,
   Key as KeyIcon,
-  LayoutDashboard as LayoutDashboardIcon
+  LayoutDashboard as LayoutDashboardIcon,
+  ClipboardList as ClipboardListIcon
 } from "lucide-react"
-import Profile from "./pages/Profile"
-import Change_password from "./pages/Change_password"
-import Dashboard from "./pages/Dashboard"
-import ProductDetail from "./pages/Product_detail"
-import Orders from "./pages/Orders"
-import Terms from "./pages/Terms"
-import PrivacyPolicy from "./pages/Privacy_policy"
-
+import Profile from "@/pages/auth/Profile"
+import Change_password from "@/pages/auth/Change_password"
+import Dashboard from "@/pages/admin/Dashboard"
+import ProductDetail from "@/pages/public/Product_detail"
+import Orders from "@/pages/admin/Orders"
+import Terms from "@/pages/public/Terms"
+import PrivacyPolicy from "@/pages/public/Privacy_policy"
+import { CartProvider, useCart } from "./pages/context/CartContext"
+import { WishlistProvider, useWishlist } from "./pages/context/WishlistContext"
+import Cart from "@/pages/public/Cart"
+import Wishlist from "@/pages/public/Wishlist"
+import { Badge } from "@/components/ui/display/badge"
+import CustomersPage from "./pages/admin/Customers"
 
 const publicLinks = [
   { name: "Home", path: "/", icon: HomeIcon },
@@ -41,10 +47,10 @@ const publicLinks = [
 ]
 
 const productLinks = [
-  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboardIcon },
   { name: "Product", path: "/product", icon: LeafIcon },
-  { name: "Cart", path: "/product", icon: CartIcon },
-  { name: "Wishlist", path: "/product", icon: HeartIcon }
+  { name: "Cart", path: "/cart", icon: CartIcon },
+  { name: "Wishlist", path: "/wishlist", icon: HeartIcon },
+  { name: "My Orders", path: "/my-orders", icon: ClipboardListIcon }
 ]
 
 const adminLinks = [
@@ -54,18 +60,16 @@ const adminLinks = [
   { name: "Customers", path: "/admin/customers", icon: UserIcon },
 ]
 
-const App = () => {
-  // Track current URL path and allow header navigation redirecting
+const AppContent = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Track the logged-in username
   const [username, setUsername] = useState<string | null>(() => localStorage.getItem("username"))
-  // Track the user's role
   const [role, setRole] = useState<string | null>(() => localStorage.getItem("role"))
-  
-  // Track dropdown visibility
   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  const { totalCount } = useCart()
+  const { totalCount: wishlistCount } = useWishlist()
 
   useEffect(() => {
     const stored = localStorage.getItem("username")
@@ -73,7 +77,6 @@ const App = () => {
     setRole(localStorage.getItem("role"))
   }, [location.pathname])
 
-  // Close dropdown if user clicks outside of the profile menu
   useEffect(() => {
     if (!dropdownOpen) return
 
@@ -90,7 +93,6 @@ const App = () => {
     }
   }, [dropdownOpen])
 
-  // Handle logging out the user and routing them back to the login page
   const handleLogout = () => {
     localStorage.removeItem("username")
     localStorage.removeItem("role")
@@ -99,7 +101,6 @@ const App = () => {
     navigate("/login")
   }
 
-  // Filter links based on auth + role
   const navLinks = !username
     ? publicLinks
     : role === "admin"
@@ -122,7 +123,19 @@ const App = () => {
               to={link.path}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-white hover:bg-zinc-800 transition-all duration-200"
             >
-              <link.icon className="w-4 h-4 text-emerald-400" />
+              <span className="relative inline-flex">
+                <link.icon className="w-4 h-4 text-emerald-400" />
+                {link.name === "Cart" && totalCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-emerald-500 text-zinc-950 text-[9px] h-3.5 min-w-3.5 px-1 flex items-center justify-center rounded-full font-bold leading-none hover:bg-emerald-500">
+                    {totalCount}
+                  </Badge>
+                )}
+                {link.name === "Wishlist" && wishlistCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-emerald-500 text-zinc-950 text-[9px] h-3.5 min-w-3.5 px-1 flex items-center justify-center rounded-full font-bold leading-none hover:bg-emerald-500">
+                    {wishlistCount}
+                  </Badge>
+                )}
+              </span>
               <span>{link.name}</span>
             </Link>
           ))}
@@ -139,7 +152,6 @@ const App = () => {
 
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-xl bg-zinc-950/95 border border-zinc-800 text-zinc-100 shadow-2xl z-50 py-1.5 backdrop-blur-xl animate-fade-in">
-                  {/* User header section */}
                   <div className="px-4 py-2 border-b border-zinc-800/80">
                     <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">User Account</p>
                     <p className="text-sm font-bold text-white truncate mt-0.5">{username}</p>
@@ -150,8 +162,7 @@ const App = () => {
                       </span>
                     )}
                   </div>
-                  
-                  {/* Menu items */}
+
                   <div className="p-1 space-y-0.5">
                     <Link
                       to="/profile"
@@ -190,7 +201,7 @@ const App = () => {
           )}
         </nav>
       </header>
-      
+
       <main className="flex-1 max-w-6xl w-full mx-auto p-6 flex flex-col justify-center">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -201,20 +212,32 @@ const App = () => {
           <Route path="/product" element={<ProductPage />} />
           <Route path="/Product" element={<ProductPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/forgot-password" element={<Forgot_password/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/change-password" element={<Change_password/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/admin/customers" element={<CustomersPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<Terms />} />
         </Routes>
       </main>
 
       <Footer />
-      {/* Renders global sonner toast notifications at the screen level */}
       <Toaster />
     </div>
+  )
+}
+
+const App = () => {
+  return (
+    <CartProvider>
+      <WishlistProvider>
+        <AppContent />
+      </WishlistProvider>
+    </CartProvider>
   )
 }
 

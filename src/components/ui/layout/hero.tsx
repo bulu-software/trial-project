@@ -6,8 +6,8 @@ import {
   CarouselNext,
   CarouselPrevious,
   type CarouselApi,
-} from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/display/carousel";
+import { Button } from "@/components/ui/forms/button";
 import { heroSlides } from "@/data/hero";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/display/card"
+import { Button } from "@/components/ui/forms/button"
+import { Separator } from "@/components/ui/display/separator"
 import { LayoutDashboard, Sprout, ShoppingCart, Users, TrendingUp, Settings, ArrowRight } from "lucide-react"
 
 const Dashboard = () => {

@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/forms/input"
+import { Label } from "@/components/ui/forms/label"
+import { Textarea } from "@/components/ui/forms/textarea"
+import { Button } from "@/components/ui/forms/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/display/card"
 import { User, Mail, MessageSquare, Leaf, ArrowRight } from "lucide-react"
 
 const Contact = () => {
@@ -14,7 +14,7 @@ const Contact = () => {
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsSuccess(false)
@@ -25,14 +25,25 @@ const Contact = () => {
     }
 
     setIsLoading(true)
-    // Simulate sending message
-    setTimeout(() => {
-      setIsLoading(false)
+
+    try {
+      const res = await fetch("https://formspree.io/f/mykrldka", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      })
+
+      if (!res.ok) throw new Error("Failed to send")
+
       setIsSuccess(true)
       setName("")
       setEmail("")
       setMessage("")
-    }, 1500)
+    } catch (err) {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

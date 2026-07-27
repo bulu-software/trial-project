@@ -1,25 +1,27 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/forms/button";
+import { Badge } from "@/components/ui/display/badge";
+import { Card } from "@/components/ui/display/card";
+import { Input } from "@/components/ui/forms/input";
+import { Label } from "@/components/ui/forms/label";
+import { Separator } from "@/components/ui/display/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/display/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/forms/select";
 import { toast } from "sonner";
 import {
   ShoppingCart, Heart, Search, Leaf, Star, Sprout,
   Pencil, Trash2, Save, X, AlertTriangle, Plus, Upload,
 } from "lucide-react";
 import { products as initialProducts, type Product } from "@/data/products";
+import { useCart } from "@/pages/context/CartContext";
+import { useWishlist } from "@/pages/context/WishlistContext";
 
 const categories = ["All", "Indoor", "Low-light", "Succulent", "Flowering"] as const;
 type Category = (typeof categories)[number];
@@ -27,12 +29,13 @@ type SortKey = "featured" | "price-asc" | "price-desc" | "rating";
 
 const ProductPage = () => {
   const isAdmin = localStorage.getItem("role") === "admin";
+  const { addItem } = useCart();
+  const { toggleItem, isWishlisted } = useWishlist();
 
   const [productList, setProductList] = useState<Product[]>(initialProducts);
   const [query, setQuery]             = useState<string>("");
   const [category, setCategory]       = useState<Category>("All");
   const [sort, setSort]               = useState<SortKey>("featured");
-  const [wishlist, setWishlist]       = useState<Set<number>>(new Set());
 
   // Edit state
   const [editingId, setEditingId]     = useState<number | null>(null);
@@ -51,13 +54,27 @@ const ProductPage = () => {
   // Delete confirm state
   const [deleteId, setDeleteId]       = useState<number | null>(null);
 
-  /* ── Wishlist ── */
-  const toggleWishlist = (id: number) => {
-    setWishlist((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+  /* ── Add to Cart ── */
+  const handleAddToCart = (product: Product) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
     });
+    toast.success(`${product.name} added to cart`);
+  };
+
+  /* ── Wishlist toggle ── */
+  const handleToggleWishlist = (product: Product) => {
+    const wasWishlisted = isWishlisted(product.id);
+    toggleItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    });
+    toast.success(wasWishlisted ? "Removed from wishlist" : "Added to wishlist");
   };
 
   /* ── Add handler ── */
@@ -244,12 +261,12 @@ const ProductPage = () => {
                     />
                   </Link>
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={() => handleToggleWishlist(product)}
                     aria-label="Toggle wishlist"
                     className="absolute top-3 right-3 p-2 rounded-full bg-zinc-950/70 backdrop-blur border border-zinc-800 text-zinc-300 hover:text-red-400 transition-colors z-10"
                   >
                     <Heart
-                      className={`w-4 h-4 ${wishlist.has(product.id) ? "fill-red-400 text-red-400" : ""}`}
+                      className={`w-4 h-4 ${isWishlisted(product.id) ? "fill-red-400 text-red-400" : ""}`}
                     />
                   </button>
                   {product.badge && (
@@ -390,6 +407,7 @@ const ProductPage = () => {
                           <div className="flex items-center justify-end pt-0.5">
                             <Button
                               size="sm"
+                              onClick={() => handleAddToCart(product)}
                               className="bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer h-8 text-xs w-full justify-center"
                             >
                               <ShoppingCart className="w-3.5 h-3.5" />

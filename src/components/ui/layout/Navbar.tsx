@@ -17,44 +17,54 @@ import {
   LogIn,
   Mail,
   Info,
+  Heart,
+  ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCart } from "@/pages/context/CartContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const username = localStorage.getItem("username");
   const role = localStorage.getItem("role");
   const isLoggedIn = !!username;
+  const isAdmin = isLoggedIn && role === "admin";
 
-  // Add Product modal state
+  const { totalCount } = useCart();
+
   const [showAdd, setShowAdd] = useState(false);
   const [addName, setAddName] = useState("");
   const [addPrice, setAddPrice] = useState("");
   const [addCategory, setAddCategory] = useState("Indoor");
 
-  // Quick-edit modal state
   const [showEdit, setShowEdit] = useState(false);
   const [editId, setEditId] = useState("");
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
 
-  // Delete confirm modal state
   const [showDelete, setShowDelete] = useState(false);
   const [deleteId, setDeleteId] = useState("");
 
-  const menuItems = isLoggedIn
+  // Menu items differ by auth state and role
+  const menuItems = !isLoggedIn
+    ? [
+        { to: "/product", label: "Products", icon: Leaf },
+        { to: "/login", label: "Login", icon: LogIn },
+        { to: "/about", label: "About", icon: Info },
+        { to: "/contact", label: "Contact", icon: Mail },
+      ]
+    : isAdmin
     ? [
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/product", label: "Products", icon: Leaf },
         { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
         { to: "/admin/customers", label: "Customers", icon: Users },
-        { to: "/admin/categories", label: "Categories", icon: Tag },
-        { to: "/admin/settings", label: "Settings", icon: Settings },
       ]
     : [
-        { to: "/login", label: "Login", icon: LogIn },
-        { to: "/contact", label: "Contact", icon: Mail },
-        { to: "/about", label: "About", icon: Info },
+        { to: "/product", label: "Products", icon: Leaf },
+        { to: "/cart", label: "Cart", icon: ShoppingCart },
+        { to: "/wishlist", label: "Wishlist", icon: Heart },
+        { to: "/my-orders", label: "My Orders", icon: ClipboardList },
       ];
 
   const handleAdd = () => {
@@ -88,14 +98,11 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ── Navbar bar ── */}
       <div className="w-full bg-zinc-900/90 backdrop-blur border border-zinc-800/80 text-zinc-100 px-6 py-3.5 flex items-center gap-6 rounded-2xl shadow-xl shadow-black/40 mb-8">
-        {/* Brand label */}
         <span className="font-semibold text-emerald-400 tracking-wider text-xs uppercase bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 mr-2 shrink-0">
-          {isLoggedIn && role === "admin" ? "Admin Menu" : "Menu"}
+          {isAdmin ? "Admin Menu" : "Menu"}
         </span>
 
-        {/* Nav links */}
         <div className="flex items-center gap-5 flex-wrap flex-1">
           {menuItems.map(({ to, label, icon: Icon }) => (
             <Link
@@ -103,14 +110,20 @@ const Navbar = () => {
               to={to}
               className="flex items-center gap-1.5 text-sm font-medium text-zinc-300 hover:text-emerald-400 transition-colors duration-200"
             >
-              <Icon className="w-4 h-4 text-emerald-400" />
+              <span className="relative inline-flex">
+                <Icon className="w-4 h-4 text-emerald-400" />
+                {label === "Cart" && totalCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-emerald-500 text-zinc-950 text-[9px] font-bold h-3.5 min-w-3.5 px-1 rounded-full flex items-center justify-center leading-none">
+                    {totalCount}
+                  </span>
+                )}
+              </span>
               <span>{label}</span>
             </Link>
           ))}
         </div>
 
-        {/* Action buttons */}
-        {isLoggedIn && role === "admin" && (
+        {isAdmin && (
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { setShowAdd(true); setShowEdit(false); setShowDelete(false); }}
@@ -136,10 +149,8 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Divider */}
         {isLoggedIn && <div className="w-px h-6 bg-zinc-800 shrink-0" />}
 
-        {/* Account info */}
         {isLoggedIn && (
           <div className="flex items-center gap-2.5 shrink-0">
             {role && (
@@ -156,8 +167,7 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* ── ADD PRODUCT MODAL ── */}
-      {showAdd && isLoggedIn && role === "admin" && (
+      {showAdd && isAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 space-y-4 relative">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/20 via-emerald-400 to-green-500/20 rounded-t-2xl" />
@@ -199,8 +209,7 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* ── EDIT PRODUCT MODAL ── */}
-      {showEdit && isLoggedIn && role === "admin" && (
+      {showEdit && isAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 space-y-4 relative">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500/20 via-blue-400 to-cyan-500/20 rounded-t-2xl" />
@@ -239,8 +248,7 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* ── DELETE CONFIRM MODAL ── */}
-      {showDelete && isLoggedIn && role === "admin" && (
+      {showDelete && isAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-sm bg-zinc-900 border border-red-500/30 rounded-2xl shadow-2xl p-6 space-y-4 relative">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500/20 via-red-400 to-rose-500/20 rounded-t-2xl" />

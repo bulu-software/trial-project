@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/display/card"
+import { Label } from "@/components/ui/forms/label"
+import { Input } from "@/components/ui/forms/input"
+import { Button } from "@/components/ui/forms/button"
 import { Key, Eye, EyeOff, Lock, Check } from "lucide-react"
 
 const Change_password = () => {

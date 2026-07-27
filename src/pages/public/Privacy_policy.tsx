@@ -1,40 +1,32 @@
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { FileText, ShieldAlert, Scale, HelpCircle } from "lucide-react";
+import { Badge } from "@/components/ui/display/badge";
+import { Separator } from "@/components/ui/display/separator";
+import { Eye, ShieldCheck, Lock, Globe } from "lucide-react";
 
-const Terms = () => {
+const PrivacyPolicy = () => {
   const sections = [
     {
-      icon: FileText,
+      icon: Eye,
       color: "text-emerald-400",
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/20",
-      title: "1. Acceptance of Terms",
-      text: "By accessing and purchasing from PlantShop, you agree to comply with and be bound by these Terms of Service. Please review them carefully before making any purchases."
+      title: "1. Information We Collect",
+      text: "We collect information you provide directly to us when registering an account, placing an order, or contacting customer support. This includes your name, email address, billing address, and phone number."
     },
     {
-      icon: ShieldAlert,
+      icon: Lock,
       color: "text-amber-400",
       bg: "bg-amber-500/10",
       border: "border-amber-500/20",
-      title: "2. Ordering & Shipping",
-      text: "All plant orders are subject to availability. Plants are live goods; appearances vary. We pack securely, but are not liable for transit delays caused by third-party carriers."
+      title: "2. How We Secure Your Data",
+      text: "We prioritize your privacy and secure all user login credentials. We do not sell or lease your personal information to third parties. We use secure hashing protocols to protect credentials stored locally."
     },
     {
-      icon: Scale,
+      icon: Globe,
       color: "text-blue-400",
       bg: "bg-blue-500/10",
       border: "border-blue-500/20",
-      title: "3. Returns & Refunds",
-      text: "Returns are not accepted due to perishability. If plants arrive damaged or dead, contact customer support within 24 hours with photos for a replacement or store credit."
-    },
-    {
-      icon: HelpCircle,
-      color: "text-purple-400",
-      bg: "bg-purple-500/10",
-      border: "border-purple-500/20",
-      title: "4. Customer Care Policy",
-      text: "You are responsible for providing proper water, lighting, and humidity. PlantShop is not liable for plant health decline after 48 hours post-delivery."
+      title: "3. Cookies & Tracking",
+      text: "Our store utilizes local storage and cookies to maintain authenticated user sessions, save items in your shopping cart, and personalize your experience. You can disable cookies in your browser settings."
     }
   ];
 
@@ -44,13 +36,13 @@ const Terms = () => {
       {/* Header section */}
       <div className="flex items-center gap-2.5">
         <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/20 shadow-lg shadow-emerald-950/20">
-          <Scale className="w-5 h-5 text-emerald-400" />
+          <ShieldCheck className="w-5 h-5 text-emerald-400" />
         </div>
         <div>
           <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/10 mb-0.5 text-[9px] py-0 px-2 tracking-wider uppercase font-bold">
-            Legal Agreements
+            Data Protection
           </Badge>
-          <h1 className="text-xl font-bold text-white tracking-tight">Terms of Service</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">Privacy Policy</h1>
         </div>
       </div>
 
@@ -90,4 +82,4 @@ const Terms = () => {
   );
 };
 
-export default Terms;
+export default PrivacyPolicy;

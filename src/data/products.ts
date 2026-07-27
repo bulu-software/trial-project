@@ -79,7 +79,7 @@ export const products: Product[] = [
   },
   {
     id: 7,
-    name: "catharanthus roseus",
+    name: "Catharanthus Roseus",
     category: "Low-light",
     price: 549,
     rating: 4.8,
@@ -90,7 +90,7 @@ export const products: Product[] = [
   },
   {
     id: 8,
-    name: " Jade Plant",
+    name: "Jade Plant",
     category: "Flowering",
     price: 749,
     rating: 4.6,
