@@ -81,7 +81,9 @@ const Cart = () => {
       </div>
 
       <div className="flex justify-end mt-4">
-        <Button size="lg">Proceed to Checkout</Button>
+        <Link to="/checkout">
+          <Button size="lg">Proceed to Checkout</Button>
+        </Link>
       </div>
     </div>
   )

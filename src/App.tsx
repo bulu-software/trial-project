@@ -38,6 +38,10 @@ import Cart from "@/pages/customer/Cart"
 import Wishlist from "@/pages/customer/Wishlist"
 import { Badge } from "@/components/ui/display/badge"
 import CustomersPage from "./pages/admin/Customers"
+import Checkout from "./pages/customer/Checkout"
+import OrderSuccess from "./pages/customer/OrderSuccess"
+import MyOrders from "./pages/customer/MyOrders"
+import OrderDetails from "./pages/customer/OrderDetails"
 
 const publicLinks = [
   { name: "Home", path: "/", icon: HomeIcon },
@@ -219,9 +223,13 @@ const AppContent = () => {
           <Route path="/change-password" element={<Change_password/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/checkout" element={<Checkout/>} />
+          <Route path="/order-success" element={<OrderSuccess/>} />
+          <Route path="/my-orders/:id" element={<OrderDetails/>} />
           <Route path="/admin/customers" element={<CustomersPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<Terms />} />
+          <Route path="/my-orders" element={<MyOrders/>} />
         </Routes>
       </main>
 
