@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/display/card"
 import { Button } from "@/components/ui/forms/button"
 import { Badge } from "@/components/ui/display/badge"
 import { Package, Star, CheckCircle2, Truck, XCircle } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { dummyOrders } from "@/data/orders-data"
 
 const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2 }> = {
@@ -13,7 +13,15 @@ const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2 }>
 }
 
 const MyOrders = () => {
-  const [orders, setOrders] = useState(dummyOrders)
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem("my-orders")
+    return saved ? JSON.parse(saved) : dummyOrders
+  })
+
+  useEffect(() => {
+    localStorage.setItem("my-orders", JSON.stringify(orders))
+  }, [orders])
+
   // key: `${orderId}-${itemId}` for whichever item's review box is open
   const [reviewOpenKey, setReviewOpenKey] = useState<string | null>(null)
 

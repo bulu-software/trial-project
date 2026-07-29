@@ -8,14 +8,56 @@ import { Label } from "@/components/ui/forms/label"
 import { Separator } from "@/components/ui/display/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/layout/radio-group"
 import { Minus, Plus, MapPin, Wallet, ShoppingBag } from "lucide-react"
+import { toast } from "sonner"
 
 const Checkout = () => {
-  const { items, totalPrice, updateQuantity } = useCart()
+  const { items, totalPrice, updateQuantity, clearCart } = useCart()
   const navigate = useNavigate()
 
   const [paymentMethod, setPaymentMethod] = useState("cod")
 
+  // controlled shipping fields
+  const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [address, setAddress] = useState("")
+  const [city, setCity] = useState("")
+  const [pincode, setPincode] = useState("")
+
   const handlePlaceOrder = () => {
+    if (!fullName.trim()) {
+      toast.error("Please enter your name")
+      return
+    }
+
+    if (!phone.trim()) {
+      toast.error("Please enter your phone number")
+      return
+    }
+    if (!/^\d{10}$/.test(phone.trim())) {
+      toast.error("Phone number must be exactly 10 digits")
+      return
+    }
+
+    if (!address.trim()) {
+      toast.error("Please enter your address")
+      return
+    }
+    if (!city.trim()) {
+      toast.error("Please enter your city")
+      return
+    }
+
+    if (!pincode.trim()) {
+      toast.error("Please enter your pincode")
+      return
+    }
+    if (!/^\d{6}$/.test(pincode.trim())) {
+      toast.error("Pincode must be exactly 6 digits")
+      return
+    }
+
+    toast.success("Order placed successfully!")
+    clearCart()
     navigate("/order-success")
   }
 
@@ -44,27 +86,56 @@ const Checkout = () => {
           <div className="flex flex-col gap-2">
             <div>
               <Label htmlFor="fullName" className="text-xs">Full Name</Label>
-              <Input id="fullName" className="h-8 text-sm" />
+              <Input
+                id="fullName"
+                className="h-8 text-sm"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
             </div>
 
             <div>
               <Label htmlFor="phone" className="text-xs">Phone Number</Label>
-              <Input id="phone" className="h-8 text-sm" />
+              <Input
+                id="phone"
+                type="tel"
+                maxLength={10}
+                className="h-8 text-sm"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+              />
             </div>
 
             <div>
               <Label htmlFor="address" className="text-xs">Address</Label>
-              <Input id="address" className="h-8 text-sm" />
+              <Input
+                id="address"
+                className="h-8 text-sm"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label htmlFor="city" className="text-xs">City</Label>
-                <Input id="city" className="h-8 text-sm" />
+                <Input
+                  id="city"
+                  className="h-8 text-sm"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
               </div>
               <div>
                 <Label htmlFor="pincode" className="text-xs">Pincode</Label>
-                <Input id="pincode" className="h-8 text-sm" />
+                <Input
+                  id="pincode"
+                  type="text"
+                  maxLength={6}
+                  className="h-8 text-sm"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
+                />
               </div>
             </div>
           </div>

@@ -35,30 +35,38 @@ const Login = () => {
     }
 
     setIsLoading(true)
+
     setTimeout(() => {
       setIsLoading(false)
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]")
+
+      const matchedUser = users.find(
+        (u: { email: string; password: string }) =>
+          u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      )
+
+      if (!matchedUser) {
+        setError("Invalid email or password")
+        return
+      }
 
       // Determine role based on email
       const isAdmin = email.toLowerCase() === "admin@plantshop.com"
       const role = isAdmin ? "admin" : "user"
 
-      // Save username to localStorage
-      const storedName = localStorage.getItem("username")
-      if (!storedName) {
-        const extractedName = email.split("@")[0]
-        const formattedName = extractedName.charAt(0).toUpperCase() + extractedName.slice(1)
-        localStorage.setItem("username", formattedName)
-      }
-
-      // Always update role on login
+      // Save the matched user's name, role, and email
+      localStorage.setItem("username", matchedUser.name)
       localStorage.setItem("role", role)
+      localStorage.setItem("currentUserEmail", matchedUser.email)
 
       toast.success("Login successful", {
         description: isAdmin
           ? "Welcome back, Admin! Redirecting to dashboard..."
-          : "Redirecting you to the dashboard...",
+          : "Redirecting you to the shop...",
       })
-      navigate("/dashboard")
+
+      navigate(isAdmin ? "/dashboard" : "/product")
     }, 1500)
   }
 

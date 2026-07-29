@@ -13,10 +13,10 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  
+
   const navigate = useNavigate()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,10 +39,26 @@ const Register = () => {
     }
 
     setIsLoading(true)
+
     // Simulate register request
     setTimeout(() => {
       setIsLoading(false)
-      localStorage.setItem("username", name)
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]")
+
+      const alreadyExists = users.some(
+        (u: { email: string }) => u.email.toLowerCase() === email.toLowerCase()
+      )
+
+      if (alreadyExists) {
+        setError("An account with this email already exists")
+        return
+      }
+
+      const newUser = { name, email, password }
+      users.push(newUser)
+      localStorage.setItem("users", JSON.stringify(users))
+
       // Navigate to login after registration
       navigate("/login")
     }, 1500)
@@ -57,7 +73,7 @@ const Register = () => {
       <Card className="w-full max-w-lg border-border/40 bg-card/45 backdrop-blur-xl shadow-2xl shadow-emerald-950/20 hover:border-emerald-500/20 transition-all duration-500 relative overflow-hidden group">
         {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/20 via-emerald-400 to-green-500/20" />
-        
+
         <CardHeader className="space-y-2 text-center pt-8">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-2 transition-transform duration-300 group-hover:scale-110">
             <Leaf className="size-6 fill-emerald-400/10" />
@@ -75,7 +91,7 @@ const Register = () => {
                 {error}
               </div>
             )}
-            
+
             {/* Grid for Name & Email to save vertical height */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">

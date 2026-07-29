@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/forms/button";
 import { Badge } from "@/components/ui/display/badge";
 import { Card } from "@/components/ui/display/card";
@@ -31,6 +31,7 @@ const ProductPage = () => {
   const isAdmin = localStorage.getItem("role") === "admin";
   const { addItem } = useCart();
   const { toggleItem, isWishlisted } = useWishlist();
+  const navigate = useNavigate();
 
   const [productList, setProductList] = useState<Product[]>(initialProducts);
   const [query, setQuery]             = useState<string>("");
@@ -54,8 +55,16 @@ const ProductPage = () => {
   // Delete confirm state
   const [deleteId, setDeleteId]       = useState<number | null>(null);
 
+  /* ── Auth check ── */
+  const isLoggedIn = () => !!localStorage.getItem("username");
+
   /* ── Add to Cart ── */
   const handleAddToCart = (product: Product) => {
+    if (!isLoggedIn()) {
+      toast.error("Please login first to add items to cart");
+      navigate("/login");
+      return;
+    }
     addItem({
       id: product.id,
       name: product.name,
@@ -67,6 +76,11 @@ const ProductPage = () => {
 
   /* ── Wishlist toggle ── */
   const handleToggleWishlist = (product: Product) => {
+    if (!isLoggedIn()) {
+      toast.error("Please login first to add items to wishlist");
+      navigate("/login");
+      return;
+    }
     const wasWishlisted = isWishlisted(product.id);
     toggleItem({
       id: product.id,

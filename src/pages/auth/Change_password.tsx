@@ -46,8 +46,36 @@ const Change_password = () => {
     }
 
     setIsLoading(true)
+
     setTimeout(() => {
       setIsLoading(false)
+
+      const currentUserEmail = localStorage.getItem("currentUserEmail")
+
+      if (!currentUserEmail) {
+        setError("You must be logged in to change your password")
+        return
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]")
+
+      const userIndex = users.findIndex(
+        (u: { email: string }) => u.email.toLowerCase() === currentUserEmail.toLowerCase()
+      )
+
+      if (userIndex === -1) {
+        setError("Account not found")
+        return
+      }
+
+      if (users[userIndex].password !== currentPassword) {
+        setError("Current password is incorrect")
+        return
+      }
+
+      users[userIndex].password = newPassword
+      localStorage.setItem("users", JSON.stringify(users))
+
       toast.success("Password Changed Successfully", {
         description: "Your security credentials have been updated.",
       })
@@ -61,7 +89,7 @@ const Change_password = () => {
 
       <Card className="w-full max-w-sm border-zinc-800 bg-zinc-900/60 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/20 via-emerald-400 to-green-500/20" />
-        
+
         <CardHeader className="space-y-2 text-center pt-6 pb-2">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <Key className="size-5 text-emerald-400" />

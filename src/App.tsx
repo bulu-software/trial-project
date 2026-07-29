@@ -32,16 +32,16 @@ import ProductDetail from "@/pages/customer/Product_detail"
 import Orders from "@/pages/admin/Orders"
 import Terms from "@/pages/public/Terms"
 import PrivacyPolicy from "@/pages/public/Privacy_policy"
-import { CartProvider, useCart } from "./pages/context/CartContext"
-import { WishlistProvider, useWishlist } from "./pages/context/WishlistContext"
+import { CartProvider, useCart } from "@/pages/context/CartContext"
+import { WishlistProvider, useWishlist } from "@/pages/context/WishlistContext"
 import Cart from "@/pages/customer/Cart"
 import Wishlist from "@/pages/customer/Wishlist"
 import { Badge } from "@/components/ui/display/badge"
-import CustomersPage from "./pages/admin/Customers"
-import Checkout from "./pages/customer/Checkout"
-import OrderSuccess from "./pages/customer/OrderSuccess"
-import MyOrders from "./pages/customer/MyOrders"
-import OrderDetails from "./pages/customer/OrderDetails"
+import CustomersPage from "@/pages/admin/Customers"
+import Checkout from "@/pages/customer/Checkout"
+import OrderSuccess from "@/pages/customer/OrderSuccess"
+import MyOrders from "@/pages/customer/MyOrders"
+import OrderDetails from "@/pages/customer/OrderDetails"
 
 const publicLinks = [
   { name: "Home", path: "/", icon: HomeIcon },
@@ -59,7 +59,7 @@ const productLinks = [
 
 const adminLinks = [
   { name: "Dashboard", path: "/dashboard", icon: LayoutDashboardIcon },
-  { name: "Products", path: "/product", icon: LeafIcon },
+  { name: "Products", path: "/admin/products", icon: LeafIcon },
   { name: "Orders", path: "/admin/orders", icon: CartIcon },
   { name: "Customers", path: "/admin/customers", icon: UserIcon },
 ]
@@ -214,7 +214,6 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product" element={<ProductPage />} />
-          <Route path="/Product" element={<ProductPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
@@ -222,6 +221,7 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile/>} />
           <Route path="/change-password" element={<Change_password/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
+          <Route path="/admin/products" element={<ProductPage />} />
           <Route path="/admin/orders" element={<Orders />} />
           <Route path="/checkout" element={<Checkout/>} />
           <Route path="/order-success" element={<OrderSuccess/>} />

@@ -28,8 +28,21 @@ const Forgot_password = () => {
     }
 
     setIsLoading(true)
+
     setTimeout(() => {
       setIsLoading(false)
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]")
+
+      const accountExists = users.some(
+        (u: { email: string }) => u.email.toLowerCase() === email.toLowerCase()
+      )
+
+      if (!accountExists) {
+        setError("No account found with this email")
+        return
+      }
+
       setSubmitted(true)
     }, 1200)
   }

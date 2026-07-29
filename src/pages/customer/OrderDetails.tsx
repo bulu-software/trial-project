@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { Card } from "@/components/ui/display/card"
 import { Button } from "@/components/ui/forms/button"
@@ -9,14 +9,24 @@ import { dummyOrders, type OrderItem } from "@/data/orders-data"
 
 const trackingSteps = ["Order Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"]
 
+const getSavedOrders = () => {
+  const saved = localStorage.getItem("my-orders")
+  return saved ? JSON.parse(saved) : dummyOrders
+}
+
 const OrderDetails = () => {
   const { id } = useParams()
-  const initialOrder = dummyOrders.find((o) => o.id === id)
 
-  const [items, setItems] = useState<OrderItem[]>(initialOrder?.items ?? [])
+  const [allOrders, setAllOrders] = useState(() => getSavedOrders())
   const [reviewOpenId, setReviewOpenId] = useState<number | null>(null)
 
-  if (!initialOrder) {
+  useEffect(() => {
+    localStorage.setItem("my-orders", JSON.stringify(allOrders))
+  }, [allOrders])
+
+  const order = allOrders.find((o) => o.id === id)
+
+  if (!order) {
     return (
       <div className="max-w-xl mx-auto w-full py-8 px-3 text-center">
         <Package className="w-8 h-8 text-muted-foreground mb-2.5 mx-auto" />
@@ -28,14 +38,26 @@ const OrderDetails = () => {
     )
   }
 
-  const order = initialOrder
+  const items: OrderItem[] = order.items
 
   const setItemRating = (itemId: number, value: number) => {
-    setItems((prev) => prev.map((it) => (it.id === itemId ? { ...it, rating: value } : it)))
+    setAllOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? { ...o, items: o.items.map((it) => (it.id === itemId ? { ...it, rating: value } : it)) }
+          : o
+      )
+    )
   }
 
   const setItemReview = (itemId: number, value: string) => {
-    setItems((prev) => prev.map((it) => (it.id === itemId ? { ...it, review: value } : it)))
+    setAllOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? { ...o, items: o.items.map((it) => (it.id === itemId ? { ...it, review: value } : it)) }
+          : o
+      )
+    )
   }
 
   return (
@@ -113,16 +135,16 @@ const OrderDetails = () => {
         {/* Items — now with per-item rating & review */}
         <Card className="p-2.5">
           <h2 className="text-xs font-semibold mb-1.5">Items</h2>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {items.map((item) => (
-              <div key={item.id} className="flex flex-col gap-1">
+              <div key={item.id} className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between text-xs">
                   <p className="truncate">{item.name} <span className="text-muted-foreground">x{item.qty}</span></p>
                   <p className="font-medium">₹{item.price.toFixed(2)}</p>
                 </div>
 
                 {order.status === "Delivered" && (
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button key={star} onClick={() => setItemRating(item.id, star)}>
@@ -146,13 +168,28 @@ const OrderDetails = () => {
                       </button>
                     </div>
 
+                    {item.review && reviewOpenId !== item.id && (
+                      <p className="text-[11px] text-muted-foreground italic leading-tight">
+                        "{item.review}"
+                      </p>
+                    )}
+
                     {reviewOpenId === item.id && (
-                      <textarea
-                        value={item.review}
-                        onChange={(e) => setItemReview(item.id, e.target.value)}
-                        placeholder={`Share your experience with ${item.name}...`}
-                        className="w-full text-xs rounded-md border border-border bg-transparent p-2 min-h-[50px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
-                      />
+                      <div className="flex flex-col gap-1">
+                        <textarea
+                          value={item.review}
+                          onChange={(e) => setItemReview(item.id, e.target.value)}
+                          placeholder={`Share your experience with ${item.name}...`}
+                          className="w-full text-xs rounded-md border border-border bg-transparent p-1.5 min-h-[40px] resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        <Button
+                          size="sm"
+                          className="h-6 text-[11px] self-end px-3"
+                          onClick={() => setReviewOpenId(null)}
+                        >
+                          Save Review
+                        </Button>
+                      </div>
                     )}
                   </div>
                 )}
