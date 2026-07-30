@@ -23,25 +23,32 @@ import {
   ChevronDown as ChevronDownIcon,
   Key as KeyIcon,
   LayoutDashboard as LayoutDashboardIcon,
-  ClipboardList as ClipboardListIcon
+  ClipboardList as ClipboardListIcon,
+  History as HistoryIcon,
+  Tag as TagIcon
 } from "lucide-react"
 import Profile from "@/pages/auth/Profile"
 import Change_password from "@/pages/auth/Change_password"
 import Dashboard from "@/pages/admin/Dashboard"
-import ProductDetail from "@/pages/customer/Product_detail"
+import ProductDetail from "@/pages/customer/product/Product_detail"
 import Orders from "@/pages/admin/Orders"
 import Terms from "@/pages/public/Terms"
 import PrivacyPolicy from "@/pages/public/Privacy_policy"
 import { CartProvider, useCart } from "@/pages/context/CartContext"
 import { WishlistProvider, useWishlist } from "@/pages/context/WishlistContext"
-import Cart from "@/pages/customer/Cart"
-import Wishlist from "@/pages/customer/Wishlist"
+import { RecentlyViewedProvider } from "@/pages/context/RecentlyViewedContext"
+import Cart from "@/pages/customer/cart/Cart"
+import Wishlist from "@/pages/customer/whishlist/Wishlist"
+import Recently_View from "@/pages/customer/recently-view/Recently_View"
 import { Badge } from "@/components/ui/display/badge"
 import CustomersPage from "@/pages/admin/Customers"
-import Checkout from "@/pages/customer/Checkout"
-import OrderSuccess from "@/pages/customer/OrderSuccess"
-import MyOrders from "@/pages/customer/MyOrders"
-import OrderDetails from "@/pages/customer/OrderDetails"
+import Checkout from "@/pages/customer/order/Checkout"
+import OrderSuccess from "@/pages/customer/order/OrderSuccess"
+import MyOrders from "@/pages/customer/order/MyOrders"
+import OrderDetails from "@/pages/customer/order/OrderDetails"
+import Coupon_management from "@/pages/admin/coupon/Coupon_management"
+import { NotFound, ServerError, Unauthorized, ErrorBoundary } from "@/pages/errors/Errors"
+import Product_plant_guide from "./pages/customer/product/Product_plant_guide"
 
 const publicLinks = [
   { name: "Home", path: "/", icon: HomeIcon },
@@ -54,7 +61,8 @@ const productLinks = [
   { name: "Product", path: "/product", icon: LeafIcon },
   { name: "Cart", path: "/cart", icon: CartIcon },
   { name: "Wishlist", path: "/wishlist", icon: HeartIcon },
-  { name: "My Orders", path: "/my-orders", icon: ClipboardListIcon }
+  { name: "My Orders", path: "/my-orders", icon: ClipboardListIcon },
+  { name: "Recently Viewed", path: "/recently-viewed", icon: HistoryIcon }
 ]
 
 const adminLinks = [
@@ -62,6 +70,7 @@ const adminLinks = [
   { name: "Products", path: "/admin/products", icon: LeafIcon },
   { name: "Orders", path: "/admin/orders", icon: CartIcon },
   { name: "Customers", path: "/admin/customers", icon: UserIcon },
+  { name: "Coupons", path: "/admin/coupon", icon: TagIcon },
 ]
 
 const AppContent = () => {
@@ -214,15 +223,18 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product" element={<ProductPage />} />
+           <Route path="/plantguide" element={<Product_plant_guide/>} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/recently-viewed" element={<Recently_View />} />
           <Route path="/forgot-password" element={<Forgot_password/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/change-password" element={<Change_password/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/admin/products" element={<ProductPage />} />
           <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/admin/coupon" element={<Coupon_management />} />
           <Route path="/checkout" element={<Checkout/>} />
           <Route path="/order-success" element={<OrderSuccess/>} />
           <Route path="/my-orders/:id" element={<OrderDetails/>} />
@@ -230,6 +242,9 @@ const AppContent = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<Terms />} />
           <Route path="/my-orders" element={<MyOrders/>} />
+          <Route path="/error/500" element={<ServerError />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
@@ -241,11 +256,15 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <CartProvider>
-      <WishlistProvider>
-        <AppContent />
-      </WishlistProvider>
-    </CartProvider>
+    <ErrorBoundary>
+      <CartProvider>
+        <WishlistProvider>
+          <RecentlyViewedProvider>
+            <AppContent />
+          </RecentlyViewedProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </ErrorBoundary>
   )
 }
 

@@ -13,9 +13,11 @@ import {
   Plus, 
   Check, 
   ShieldCheck, 
-  Truck 
+  Truck,
+  Leaf
 } from "lucide-react"
 import { toast } from "sonner"
+import { useRecentlyViewed } from "@/pages/context/RecentlyViewedContext"
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -23,6 +25,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
+
+  const { addToRecentlyViewed } = useRecentlyViewed()
 
   useEffect(() => {
     if (id) {
@@ -32,6 +36,18 @@ const ProductDetail = () => {
       }
     }
   }, [id])
+
+  // Track this product as recently viewed once it loads
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed({
+        id: String(product.id),
+        name: product.name,
+        image: product.image,
+        price: product.price,
+      })
+    }
+  }, [product])
 
   if (!product) {
     return (
@@ -198,6 +214,15 @@ const ProductDetail = () => {
                   <span>100% Healthy Plant Guarantee</span>
                 </div>
               </div>
+
+              {/* Plant Care Guide Link */}
+              <Link
+                to="/plantguide"
+                className="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-xl h-10 transition-all duration-200"
+              >
+                <Leaf className="w-3.5 h-3.5" />
+                View Plant Care Guide
+              </Link>
             </div>
 
           </div>

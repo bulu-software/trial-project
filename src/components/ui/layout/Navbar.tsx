@@ -59,6 +59,7 @@ const Navbar = () => {
         { to: "/product", label: "Products", icon: Leaf },
         { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
         { to: "/admin/customers", label: "Customers", icon: Users },
+        { to: "/admin/coupon", label: "Coupons", icon: Tag },
       ]
     : [
         { to: "/product", label: "Products", icon: Leaf },

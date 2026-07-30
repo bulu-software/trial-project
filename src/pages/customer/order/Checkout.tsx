@@ -1,14 +1,21 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { useCart } from "../context/CartContext"
+import { useCart } from "@/pages/context/CartContext"
 import { Card } from "@/components/ui/display/card"
 import { Button } from "@/components/ui/forms/button"
 import { Input } from "@/components/ui/forms/input"
 import { Label } from "@/components/ui/forms/label"
 import { Separator } from "@/components/ui/display/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/layout/radio-group"
-import { Minus, Plus, MapPin, Wallet, ShoppingBag } from "lucide-react"
+import { Minus, Plus, MapPin, Wallet, ShoppingBag, Tag, X } from "lucide-react"
 import { toast } from "sonner"
+
+// TEMP: replace with real coupon lookup (API / Coupon_management data) once available
+const AVAILABLE_COUPONS = {
+  SAVE10: { type: "percent", value: 10, label: "10% off" },
+  SAVE20: { type: "percent", value: 20, label: "20% off" },
+  FLAT50: { type: "flat", value: 50, label: "₹50 off" },
+}
 
 const Checkout = () => {
   const { items, totalPrice, updateQuantity, clearCart } = useCart()
@@ -22,6 +29,41 @@ const Checkout = () => {
   const [address, setAddress] = useState("")
   const [city, setCity] = useState("")
   const [pincode, setPincode] = useState("")
+
+  // coupon state
+  const [couponCode, setCouponCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState(null)
+
+  const handleApplyCoupon = () => {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) {
+      toast.error("Please enter a coupon code")
+      return
+    }
+
+    const coupon = AVAILABLE_COUPONS[code]
+    if (!coupon) {
+      toast.error("Invalid coupon code")
+      return
+    }
+
+    setAppliedCoupon({ code, ...coupon })
+    toast.success(`Coupon "${code}" applied — ${coupon.label}`)
+  }
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponCode("")
+    toast("Coupon removed")
+  }
+
+  const discountAmount = appliedCoupon
+    ? appliedCoupon.type === "percent"
+      ? (totalPrice * appliedCoupon.value) / 100
+      : Math.min(appliedCoupon.value, totalPrice)
+    : 0
+
+  const finalTotal = Math.max(totalPrice - discountAmount, 0)
 
   const handlePlaceOrder = () => {
     if (!fullName.trim()) {
@@ -165,6 +207,44 @@ const Checkout = () => {
           </RadioGroup>
         </Card>
 
+        {/* Coupon code */}
+        <Card className="p-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Tag className="w-3.5 h-3.5 text-primary" />
+            <h2 className="text-xs font-semibold">Have a coupon?</h2>
+          </div>
+
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 px-2.5 py-1.5">
+              <div className="flex items-center gap-2">
+                <Tag className="w-3.5 h-3.5 text-primary" />
+                <span className="text-sm font-semibold">{appliedCoupon.code}</span>
+                <span className="text-xs text-muted-foreground">({appliedCoupon.label})</span>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6"
+                onClick={handleRemoveCoupon}
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Enter coupon code"
+                className="h-8 text-sm uppercase"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              />
+              <Button className="h-8 shrink-0" onClick={handleApplyCoupon}>
+                Apply
+              </Button>
+            </div>
+          )}
+        </Card>
+
         {/* Order summary */}
         <Card className="p-3">
           <div className="flex items-center gap-1.5 mb-2">
@@ -215,8 +295,22 @@ const Checkout = () => {
           <Separator className="my-2" />
 
           <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Subtotal</p>
+            <p className="text-sm font-medium">₹{totalPrice.toFixed(2)}</p>
+          </div>
+
+          {appliedCoupon && (
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-xs text-primary">Discount ({appliedCoupon.code})</p>
+              <p className="text-sm font-medium text-primary">-₹{discountAmount.toFixed(2)}</p>
+            </div>
+          )}
+
+          <Separator className="my-2" />
+
+          <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">Total</p>
-            <p className="text-base font-bold text-primary">₹{totalPrice.toFixed(2)}</p>
+            <p className="text-base font-bold text-primary">₹{finalTotal.toFixed(2)}</p>
           </div>
         </Card>
 

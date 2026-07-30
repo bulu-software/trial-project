@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useWishlist } from "@/pages/context/WishlistContext";
 import { useCart } from "@/pages/context/CartContext";
@@ -5,16 +6,32 @@ import { Card } from "@/components/ui/display/card";
 import { Button } from "@/components/ui/forms/button";
 import { Badge } from "@/components/ui/display/badge";
 import { Separator } from "@/components/ui/display/separator";
-import { ShoppingCart, Trash2, Heart, Sprout } from "lucide-react";
+import { ShoppingCart, Trash2, Heart, Sprout, Check } from "lucide-react";
 import { toast } from "sonner";
 
 const Wishlist = () => {
   const { items, removeItem, clearWishlist } = useWishlist();
   const { addItem: addToCart } = useCart();
 
+  const [addedId, setAddedId] = useState<number | null>(null);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+
   const handleAddToCart = (item: { id: number; name: string; price: number; image: string }) => {
     addToCart({ id: item.id, name: item.name, price: item.price, image: item.image });
     toast.success(`${item.name} added to cart`);
+    setAddedId(item.id);
+
+    // Briefly show "Added ✓" before removing it from the wishlist
+    setTimeout(() => {
+      removeItem(item.id);
+      setAddedId(null);
+    }, 600);
+  };
+
+  const handleClearWishlist = () => {
+    clearWishlist();
+    setConfirmClearOpen(false);
+    toast.success("Wishlist cleared");
   };
 
   if (items.length === 0) {
@@ -82,10 +99,20 @@ const Wishlist = () => {
               <Button
                 size="sm"
                 onClick={() => handleAddToCart(item)}
-                className="bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer h-8 text-xs"
+                disabled={addedId === item.id}
+                className="bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold rounded-lg flex items-center gap-1.5 cursor-pointer h-8 text-xs disabled:opacity-100"
               >
-                <ShoppingCart className="w-3.5 h-3.5" />
-                Add to Cart
+                {addedId === item.id ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    Added
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    Add to Cart
+                  </>
+                )}
               </Button>
 
               <button
@@ -100,13 +127,34 @@ const Wishlist = () => {
         </div>
 
         <div className="flex justify-end mt-6">
-          <Button
-            variant="outline"
-            onClick={clearWishlist}
-            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-xl"
-          >
-            Clear Wishlist
-          </Button>
+          {confirmClearOpen ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-400">Clear all items?</span>
+              <Button
+                size="sm"
+                onClick={handleClearWishlist}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg"
+              >
+                Yes, clear
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setConfirmClearOpen(false)}
+                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-lg"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => setConfirmClearOpen(true)}
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white rounded-xl"
+            >
+              Clear Wishlist
+            </Button>
+          )}
         </div>
       </div>
     </div>

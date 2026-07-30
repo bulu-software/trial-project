@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { useCart } from "../context/CartContext"
+import { useCart } from "@/pages/context/CartContext"
 import { Card } from "@/components/ui/display/card"
 import { Button } from "@/components/ui/forms/button"
 import { Input } from "@/components/ui/forms/input"
