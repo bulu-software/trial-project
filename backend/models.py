@@ -38,3 +38,48 @@ class Product(Base):
     @features.setter
     def features(self, val):
         self.features_json = json.dumps(val)
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(String(50), primary_key=True, index=True)
+    customer_name = Column(String(100), nullable=False)
+    customer_email = Column(String(150), nullable=False)
+    date = Column(String(20), nullable=False)
+    items_json = Column(Text, nullable=False)  # JSON representation of items
+    total = Column(Float, nullable=False)
+    status = Column(String(20), default="Pending", nullable=False)
+
+    @property
+    def items(self):
+        try:
+            return json.loads(self.items_json) if self.items_json else []
+        except Exception:
+            return []
+
+    @items.setter
+    def items(self, val):
+        self.items_json = json.dumps(val)
+
+class CartItemModel(Base):
+    __tablename__ = "cart_items"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_email = Column(String(150), index=True, nullable=True)
+    product_id = Column(Integer, nullable=False)
+    name = Column(String(150), nullable=False)
+    price = Column(Float, nullable=False)
+    image = Column(Text, nullable=False)
+    quantity = Column(Integer, default=1, nullable=False)
+
+class WishlistItemModel(Base):
+    __tablename__ = "wishlist_items"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_email = Column(String(150), index=True, nullable=True)
+    product_id = Column(Integer, nullable=False)
+    name = Column(String(150), nullable=False)
+    price = Column(Float, nullable=False)
+    image = Column(Text, nullable=False)
+
+

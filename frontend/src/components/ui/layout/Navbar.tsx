@@ -6,7 +6,6 @@ import {
   ShoppingCart,
   Users,
   Tag,
-  Settings,
   ShieldCheck,
   UserCircle,
   Plus,
@@ -99,8 +98,8 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="w-full bg-zinc-900/90 backdrop-blur border border-zinc-800/80 text-zinc-100 px-6 py-3.5 flex items-center gap-6 rounded-2xl shadow-xl shadow-black/40 mb-8">
-        <span className="font-semibold text-emerald-400 tracking-wider text-xs uppercase bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 mr-2 shrink-0">
+      <div className="w-full bg-zinc-900/90 backdrop-blur border border-zinc-800/80 text-zinc-100 px-3 sm:px-6 py-3 flex items-center gap-3 sm:gap-6 rounded-2xl shadow-xl shadow-black/40 mb-6 sm:mb-8 flex-wrap">
+        <span className="font-semibold text-emerald-400 tracking-wider text-xs uppercase bg-emerald-500/10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-emerald-500/20 mr-1 sm:mr-2 shrink-0">
           {isAdmin ? "Admin Menu" : "Menu"}
         </span>
 
