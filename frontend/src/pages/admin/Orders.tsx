@@ -1,76 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/display/badge";
 import { toast } from "sonner";
 import {
   ShoppingCart, User, Calendar, Trash2,
-  CheckCircle, Clock, Truck, XCircle, Package, IndianRupee
+  CheckCircle, Clock, Truck, XCircle, Package, IndianRupee, Loader2
 } from "lucide-react";
-
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  date: string;
-  items: OrderItem[];
-  total: number;
-  status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
-}
-
-const initialOrders: Order[] = [
-  {
-    id: "ORD-9821",
-    customerName: "Rahul Sharma",
-    customerEmail: "rahul@gmail.com",
-    date: "2026-07-24",
-    items: [
-      { id: 1, name: "Monstera Deliciosa", price: 899, quantity: 1 },
-      { id: 2, name: "Snake Plant", price: 449, quantity: 2 }
-    ],
-    total: 1797,
-    status: "Pending"
-  },
-  {
-    id: "ORD-9822",
-    customerName: "Priya Patel",
-    customerEmail: "priya@yahoo.com",
-    date: "2026-07-23",
-    items: [
-      { id: 3, name: "Fiddle Leaf Fig", price: 1299, quantity: 1 }
-    ],
-    total: 1299,
-    status: "Shipped"
-  },
-  {
-    id: "ORD-9823",
-    customerName: "Amit Kumar",
-    customerEmail: "amit.k@outlook.com",
-    date: "2026-07-22",
-    items: [
-      { id: 4, name: "Golden Pothos", price: 349, quantity: 3 },
-      { id: 5, name: "Echeveria Succulent Set", price: 599, quantity: 1 }
-    ],
-    total: 1646,
-    status: "Delivered"
-  },
-  {
-    id: "ORD-9824",
-    customerName: "Sneha Reddy",
-    customerEmail: "sneha.r@gmail.com",
-    date: "2026-07-20",
-    items: [
-      { id: 6, name: "Peace Lily", price: 499, quantity: 1 }
-    ],
-    total: 499,
-    status: "Cancelled"
-  }
-];
+import { api, type Order } from "@/services/api";
 
 const statusConfig = {
   Pending: { icon: Clock, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
@@ -81,20 +16,51 @@ const statusConfig = {
 
 const Orders = () => {
   const isAdmin = localStorage.getItem("role") === "admin";
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [timeFilter, setTimeFilter] = useState<string>("All Time");
 
-  const handleStatusChange = (id: string, newStatus: Order["status"]) => {
-    setOrders((prev) =>
-      prev.map((order) => (order.id === id ? { ...order, status: newStatus } : order))
-    );
-    toast.success(`Order ${id} updated to ${newStatus}`);
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getOrders();
+      setOrders(data);
+    } catch (err: unknown) {
+      console.error("Failed to load orders:", err);
+      toast.error("Could not fetch orders from backend");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteOrder = (id: string) => {
-    setOrders((prev) => prev.filter((order) => order.id !== id));
-    toast.success(`Order ${id} deleted`);
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const handleStatusChange = async (id: string, newStatus: Order["status"]) => {
+    try {
+      await api.updateOrderStatus(id, newStatus);
+      setOrders((prev) =>
+        prev.map((order) => (order.id === id ? { ...order, status: newStatus } : order))
+      );
+      toast.success(`Order ${id} updated to ${newStatus}`);
+    } catch (err: unknown) {
+      console.error("Failed to update status:", err);
+      toast.error(`Failed to update status for order ${id}`);
+    }
   };
+
+  const handleDeleteOrder = async (id: string) => {
+    try {
+      await api.deleteOrder(id);
+      setOrders((prev) => prev.filter((order) => order.id !== id));
+      toast.success(`Order ${id} deleted`);
+    } catch (err: unknown) {
+      console.error("Failed to delete order:", err);
+      toast.error(`Failed to delete order ${id}`);
+    }
+  };
+
 
   const filteredOrders = useMemo(() => {
     const now = new Date();
@@ -144,13 +110,13 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* Time Filter */}
-        <div className="flex gap-1 bg-[#121212] p-1 rounded-full border border-zinc-800/60">
+      {/* Time Filter */}
+        <div className="flex gap-1 bg-[#121212] p-1 rounded-2xl sm:rounded-full border border-zinc-800/60 overflow-x-auto max-w-full">
           {["All Time", "Last 30 Days", "Last 90 Days", "This Year"].map((filter) => (
             <button
               key={filter}
               onClick={() => setTimeFilter(filter)}
-              className={`px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 cursor-pointer ${
+              className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
                 timeFilter === filter
                   ? "bg-[#10b981] text-black"
                   : "text-zinc-400 hover:text-white"
@@ -163,26 +129,26 @@ const Orders = () => {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-[#121212] border border-zinc-800/50 rounded-[18px] p-4 flex items-center gap-4">
-              <div className="p-2 rounded-[10px] bg-zinc-800/60">
+            <div key={stat.label} className="bg-[#121212] border border-zinc-800/50 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+              <div className="p-2 rounded-xl bg-zinc-800/60 shrink-0">
                 <Icon className={`w-4 h-4 ${stat.color}`} />
               </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">{stat.label}</p>
-                <p className="text-lg font-bold text-white">{stat.value}</p>
+              <div className="min-w-0">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-500 truncate">{stat.label}</p>
+                <p className="text-base sm:text-lg font-bold text-white truncate">{stat.value}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-[#121212] border border-zinc-800/50 rounded-[20px] overflow-hidden">
-        {/* Table Header */}
+      {/* Orders Container */}
+      <div className="bg-[#121212] border border-zinc-800/50 rounded-2xl overflow-hidden">
+        {/* Table Header (Desktop Only) */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-zinc-800/50 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">
           <div className="col-span-1">Order</div>
           <div className="col-span-3">Customer</div>
@@ -194,7 +160,12 @@ const Orders = () => {
         </div>
 
         {/* Order Rows */}
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16 flex flex-col items-center justify-center">
+            <Loader2 className="w-8 h-8 text-[#10b981] animate-spin mb-3" />
+            <p className="text-sm text-zinc-400 font-medium">Loading orders from database...</p>
+          </div>
+        ) : filteredOrders.length === 0 ? (
           <div className="text-center py-16">
             <Package className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
             <p className="text-sm text-zinc-500 font-medium">No orders found</p>
@@ -202,82 +173,141 @@ const Orders = () => {
           </div>
         ) : (
           filteredOrders.map((order, index) => {
-            const config = statusConfig[order.status];
+            const config = statusConfig[order.status] || statusConfig["Pending"];
             const StatusIcon = config.icon;
             return (
-              <div
-                key={order.id}
-                className={`grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-white/[0.02] transition-colors ${
-                  index < filteredOrders.length - 1 ? "border-b border-zinc-800/30" : ""
-                }`}
-              >
-                {/* Order ID */}
-                <div className="col-span-1">
-                  <span className="text-[12px] font-bold text-[#10b981] bg-[#10b981]/5 px-2.5 py-1 rounded-lg border border-[#10b981]/10">
-                    {order.id}
-                  </span>
-                </div>
-
-                {/* Customer */}
-                <div className="col-span-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4 text-zinc-400" />
+              <div key={order.id} className={index < filteredOrders.length - 1 ? "border-b border-zinc-800/30" : ""}>
+                {/* Desktop View */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-white/[0.02] transition-colors">
+                  {/* Order ID */}
+                  <div className="col-span-1">
+                    <span className="text-[12px] font-bold text-[#10b981] bg-[#10b981]/5 px-2.5 py-1 rounded-lg border border-[#10b981]/10">
+                      {order.id}
+                    </span>
                   </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white">{order.customerName}</p>
-                    <p className="text-[11px] text-zinc-500">{order.customerEmail}</p>
-                  </div>
-                </div>
 
-                {/* Items */}
-                <div className="col-span-3">
-                  {order.items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-[12px] text-zinc-300">
-                      <span>{item.name} <span className="text-zinc-600">×{item.quantity}</span></span>
+                  {/* Customer */}
+                  <div className="col-span-3 flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4 text-zinc-400" />
                     </div>
-                  ))}
-                </div>
-
-                {/* Date */}
-                <div className="col-span-1 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-zinc-600" />
-                  <span className="text-[12px] text-zinc-400">{order.date.slice(5)}</span>
-                </div>
-
-                {/* Total */}
-                <div className="col-span-1 text-right">
-                  <span className="text-[13px] font-bold text-white">₹{order.total.toLocaleString()}</span>
-                </div>
-
-                {/* Status */}
-                <div className="col-span-1 flex justify-center">
-                  <Badge className={`${config.bg} ${config.color} ${config.border} flex items-center gap-1 text-[10px] py-0.5 px-2.5 rounded-full`}>
-                    <StatusIcon className="w-3 h-3" />
-                    {order.status}
-                  </Badge>
-                </div>
-
-                {/* Admin Actions */}
-                {isAdmin && (
-                  <div className="col-span-2 flex items-center justify-end gap-2">
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
-                      className="h-7 text-[11px] bg-zinc-900 border border-zinc-700/50 rounded-lg text-white px-2 focus:outline-none focus:border-[#10b981]/50 cursor-pointer"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Shipped">Shipped</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Cancelled">Cancelled</option>
-                    </select>
-                    <button
-                      onClick={() => handleDeleteOrder(order.id)}
-                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-white truncate">{order.customerName}</p>
+                      <p className="text-[11px] text-zinc-500 truncate">{order.customerEmail}</p>
+                    </div>
                   </div>
-                )}
+
+                  {/* Items */}
+                  <div className="col-span-3">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex justify-between text-[12px] text-zinc-300 truncate">
+                        <span className="truncate">{item.name} <span className="text-zinc-600">×{item.quantity}</span></span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Date */}
+                  <div className="col-span-1 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                    <span className="text-[12px] text-zinc-400">{order.date.slice(5)}</span>
+                  </div>
+
+                  {/* Total */}
+                  <div className="col-span-1 text-right">
+                    <span className="text-[13px] font-bold text-white">₹{order.total.toLocaleString()}</span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-1 flex justify-center">
+                    <Badge className={`${config.bg} ${config.color} ${config.border} flex items-center gap-1 text-[10px] py-0.5 px-2.5 rounded-full`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {order.status}
+                    </Badge>
+                  </div>
+
+                  {/* Admin Actions */}
+                  {isAdmin && (
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
+                        className="h-7 text-[11px] bg-zinc-900 border border-zinc-700/50 rounded-lg text-white px-2 focus:outline-none focus:border-[#10b981]/50 cursor-pointer"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Card View (< md) */}
+                <div className="flex md:hidden flex-col gap-3 p-4 hover:bg-white/[0.02]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-[#10b981] bg-[#10b981]/5 px-2.5 py-1 rounded-lg border border-[#10b981]/10">
+                      {order.id}
+                    </span>
+                    <Badge className={`${config.bg} ${config.color} ${config.border} flex items-center gap-1 text-[10px] py-0.5 px-2 rounded-full`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {order.status}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                      <User className="w-3.5 h-3.5 text-zinc-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-white truncate">{order.customerName}</p>
+                      <p className="text-[10px] text-zinc-500 truncate">{order.customerEmail}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-zinc-950/40 border border-zinc-800/60 space-y-1">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex justify-between text-[11px] text-zinc-300">
+                        <span className="truncate">{item.name}</span>
+                        <span className="text-zinc-500 shrink-0 ml-2">×{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <div className="flex items-center gap-1 text-zinc-500">
+                      <Calendar className="w-3 h-3" />
+                      <span>{order.date}</span>
+                    </div>
+                    <span className="font-bold text-white text-sm">₹{order.total.toLocaleString()}</span>
+                  </div>
+
+                  {isAdmin && (
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-800/40">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value as Order["status"])}
+                        className="flex-1 h-8 text-xs bg-zinc-900 border border-zinc-700/50 rounded-lg text-white px-2 focus:outline-none focus:border-[#10b981]/50 cursor-pointer"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                      <button
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })
