@@ -140,17 +140,17 @@ const Coupon_management = () => {
   const isExpired = (date: string) => new Date(date) < new Date()
 
   return (
-    <div className="min-h-[80vh] bg-zinc-950 text-white py-8 px-4">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="min-h-[80vh] bg-zinc-950 text-white py-4 sm:py-8 px-2 sm:px-4">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 shrink-0">
               <Tag className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight">Coupon Management</h1>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight">Coupon Management</h1>
               <p className="text-xs text-zinc-500 mt-0.5">Create and manage discount coupons</p>
             </div>
           </div>
@@ -158,7 +158,7 @@ const Coupon_management = () => {
           {!showForm && (
             <Button
               onClick={() => setShowForm(true)}
-              className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 cursor-pointer"
+              className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl flex items-center gap-2 cursor-pointer self-start sm:self-auto text-xs sm:text-sm"
             >
               <Plus className="w-4 h-4" />
               New Coupon
