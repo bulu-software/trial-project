@@ -127,7 +127,7 @@ const Profile = () => {
       : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
 
   return (
-    <div className="relative flex items-center justify-center py-8 px-4 overflow-hidden bg-zinc-950 text-white">
+    <div className="relative flex items-center justify-center py-4 sm:py-8 px-2 sm:px-4 overflow-hidden bg-zinc-950 text-white">
       {/* Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[90px] pointer-events-none -z-10" />
 
