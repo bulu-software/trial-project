@@ -49,17 +49,17 @@ export function Hero() {
 
             return (
               <CarouselItem key={i}>
-                <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-zinc-900/95 via-zinc-950 to-zinc-900/95 p-8 md:p-12 lg:p-16 min-h-[460px] md:min-h-[500px] flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-gradient-to-br from-zinc-900/95 via-zinc-950 to-zinc-900/95 p-5 sm:p-8 md:p-12 lg:p-16 min-h-[380px] sm:min-h-[460px] md:min-h-[500px] flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-12">
                   <div className="absolute top-0 left-0 w-80 h-80 bg-plant-green/10 rounded-full blur-[100px] pointer-events-none" />
                   <div className="absolute bottom-0 right-0 w-80 h-80 bg-plant-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
-                  <div className="flex-1 space-y-6 z-10 text-left w-full md:w-auto">
+                  <div className="flex-1 space-y-4 sm:space-y-6 z-10 text-left w-full md:w-auto">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-plant-green/10 border border-plant-green/20 text-plant-accent text-xs font-semibold uppercase tracking-wider">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>{slide.badge}</span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1] font-sans">
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] font-sans">
                       {words.map((word, index) => {
                         const isHighlighted = index >= highlightFrom;
                         return (
@@ -77,13 +77,13 @@ export function Hero() {
                       })}
                     </h1>
 
-                    <p className="text-zinc-400 text-base md:text-lg max-w-md font-normal leading-relaxed">
+                    <p className="text-zinc-400 text-sm sm:text-base md:text-lg max-w-md font-normal leading-relaxed">
                       {slide.subtitle}
                     </p>
 
-                    <div className="pt-2 flex flex-col sm:flex-row gap-4">
-                      <a href={slide.href} className="inline-block">
-                        <Button className="bg-plant-green hover:bg-plant-green/90 text-zinc-950 font-bold px-8 py-6 text-base rounded-xl shadow-lg shadow-plant-green/20 hover:shadow-plant-green/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group/btn flex items-center gap-2">
+                    <div className="pt-1 sm:pt-2 flex flex-col sm:flex-row gap-4">
+                      <a href={slide.href} className="inline-block w-full sm:w-auto">
+                        <Button className="w-full sm:w-auto bg-plant-green hover:bg-plant-green/90 text-zinc-950 font-bold px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl shadow-lg shadow-plant-green/20 hover:shadow-plant-green/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group/btn flex items-center justify-center gap-2 cursor-pointer">
                           <span>{slide.cta}</span>
                           <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                         </Button>
@@ -91,7 +91,7 @@ export function Hero() {
                     </div>
                   </div>
 
-                  <div className="flex-1 w-full h-[280px] md:h-[380px] relative rounded-2xl overflow-hidden group/image border border-plant-green/10 shadow-2xl">
+                  <div className="flex-1 w-full h-[200px] sm:h-[280px] md:h-[380px] relative rounded-xl sm:rounded-2xl overflow-hidden group/image border border-plant-green/10 shadow-2xl">
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent z-10 pointer-events-none" />
                     <img
                       src={slide.image}

@@ -1,13 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+import random
+from typing import List
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from database import get_db
 import models
 import schemas
 from auth import get_password_hash, verify_password, create_access_token, get_current_user
+from email_service import create_reset_token, verify_reset_token, send_reset_password_email, send_otp_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 COOKIE_MAX_AGE = 60 * 60 * 24 * 7  # 7 days in seconds
+OTP_STORE: dict[str, dict] = {}
 
 @router.post("/register", response_model=schemas.TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: schemas.UserRegister, response: Response, db: Session = Depends(get_db)):
@@ -121,17 +126,143 @@ def change_password(
     db.commit()
     return {"message": "Password changed successfully."}
 
-@router.post("/forgot-password")
-def forgot_password(data: schemas.ForgotPassword, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == data.email).first()
+@router.post("/send-otp")
+def send_otp(
+    data: schemas.SendOTPRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    email_clean = data.email.lower().strip()
+    user = db.query(models.User).filter(models.User.email == email_clean).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No account found with this email address.",
         )
-    if data.new_password:
-        user.hashed_password = get_password_hash(data.new_password)
-        db.commit()
-        return {"message": "Password reset successfully. You can now login with your new password."}
     
-    return {"message": f"Password reset instructions sent to {data.email}."}
+    # Generate 6-digit random numeric OTP
+    otp_code = f"{random.randint(100000, 999999)}"
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+    
+    OTP_STORE[email_clean] = {
+        "otp": otp_code,
+        "expires_at": expires_at
+    }
+    
+    background_tasks.add_task(send_otp_email, user.email, user.name, otp_code)
+    
+    return {
+        "message": f"OTP verification code sent to {data.email}."
+    }
+
+@router.post("/verify-otp")
+def verify_otp(data: schemas.VerifyOTPRequest):
+    email_clean = data.email.lower().strip()
+    record = OTP_STORE.get(email_clean)
+    
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No OTP request found for this email address. Please click Send OTP first.",
+        )
+    
+    if datetime.utcnow() > record["expires_at"]:
+        OTP_STORE.pop(email_clean, None)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OTP code has expired. Please request a new code.",
+        )
+        
+    if record["otp"] != data.otp.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid OTP code. Please check your email and try again.",
+        )
+        
+    return {"message": "OTP verified successfully.", "verified": True}
+
+@router.post("/reset-password-otp")
+def reset_password_otp(data: schemas.ResetPasswordOTPRequest, db: Session = Depends(get_db)):
+    email_clean = data.email.lower().strip()
+    record = OTP_STORE.get(email_clean)
+    
+    if not record or record["otp"] != data.otp.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OTP session. Please request a new OTP code.",
+        )
+        
+    if datetime.utcnow() > record["expires_at"]:
+        OTP_STORE.pop(email_clean, None)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="OTP code has expired. Please request a new code.",
+        )
+        
+    user = db.query(models.User).filter(models.User.email == email_clean).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User account associated with this email address was not found.",
+        )
+        
+    if len(data.new_password) < 8 or len(data.new_password) > 32:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be between 8 and 32 characters long.",
+        )
+        
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    
+    # Remove OTP record after successful reset
+    OTP_STORE.pop(email_clean, None)
+    
+    return {"message": "Password reset successfully. You can now login with your new password."}
+
+@router.post("/forgot-password")
+def forgot_password(
+    data: schemas.ForgotPassword,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    # Alias for send-otp to maintain backward compatibility
+    return send_otp(schemas.SendOTPRequest(email=data.email), background_tasks, db)
+
+@router.post("/reset-password")
+def reset_password(data: schemas.ResetPassword, db: Session = Depends(get_db)):
+    email = verify_reset_token(data.token)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset link. Please request a new one.",
+        )
+    
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User account associated with this token was not found.",
+        )
+    
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "Password reset successfully. You can now login with your new password."}
+
+@router.get("/customers", response_model=List[schemas.CustomerResponse])
+def get_customers(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    result = []
+    for u in users:
+        joined_str = u.created_at.strftime("%Y-%m-%d") if u.created_at else "2026-01-01"
+        result.append({
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "phone": u.phone or "N/A",
+            "address": u.address or "N/A",
+            "joined": joined_str,
+            "orders": 1 if u.role == "customer" else 0
+        })
+    return result

@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
+import { api } from "@/services/api";
 
 export interface CartItem {
   id: number;
@@ -67,6 +68,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
   useEffect(() => {
+    const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email") || undefined;
+    
+    // First load from localStorage for instant render
     const saved = localStorage.getItem("cart");
     if (saved) {
       try {
@@ -75,22 +79,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // ignore corrupted data
       }
     }
+
+    // Then sync from FastAPI backend database
+    api.getCart(userEmail)
+      .then((backendItems) => {
+        if (backendItems && backendItems.length > 0) {
+          dispatch({ type: "LOAD", payload: backendItems });
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not sync cart from backend:", err);
+      });
   }, []);
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state.items));
   }, [state.items]);
 
-  const addItem = (item: Omit<CartItem, "quantity">) =>
+  const addItem = (item: Omit<CartItem, "quantity">) => {
     dispatch({ type: "ADD_ITEM", payload: item });
+    const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email") || undefined;
+    api.addToCart({ ...item, quantity: 1, userEmail }).catch((err) => console.warn("Failed backend addToCart:", err));
+  };
 
-  const removeItem = (id: number) =>
+  const removeItem = (id: number) => {
     dispatch({ type: "REMOVE_ITEM", payload: { id } });
+    const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email") || undefined;
+    api.removeFromCart(id, userEmail).catch((err) => console.warn("Failed backend removeFromCart:", err));
+  };
 
-  const updateQuantity = (id: number, quantity: number) =>
+  const updateQuantity = (id: number, quantity: number) => {
     dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } });
+    const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email") || undefined;
+    api.updateCartQuantity(id, quantity, userEmail).catch((err) => console.warn("Failed backend updateCartQuantity:", err));
+  };
 
-  const clearCart = () => dispatch({ type: "CLEAR" });
+  const clearCart = () => {
+    dispatch({ type: "CLEAR" });
+    const userEmail = localStorage.getItem("userEmail") || localStorage.getItem("email") || undefined;
+    api.clearCart(userEmail).catch((err) => console.warn("Failed backend clearCart:", err));
+  };
 
   const totalCount = state.items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = state.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -103,6 +131,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     </CartContext.Provider>
   );
 }
+
 
 export function useCart() {
   const ctx = useContext(CartContext);
