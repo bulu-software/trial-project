@@ -18,10 +18,12 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { useRecentlyViewed } from "@/pages/context/RecentlyViewedContext"
+import { formatPrice } from "@/lib/utils"
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const isAdmin = localStorage.getItem("role") === "admin"
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
@@ -77,7 +79,7 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     toast.success(`${product.name} added to cart`, {
-      description: `Quantity: ${quantity} item(s). Total: Rs. ${product.price * quantity}/-`
+      description: `Quantity: ${quantity} item(s). Total: ${formatPrice(product.price * quantity)}`
     })
   }
 
@@ -89,7 +91,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-[80vh] bg-zinc-950 text-white py-4 sm:py-8 px-2 sm:px-4 relative overflow-hidden">
+    <div className="min-h-[80vh] bg-zinc-950 text-white py-4 sm:py-8 px-2 sm:px-4 relative overflow-hidden isolate">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-emerald-500/5 blur-[100px] pointer-events-none -z-10 animate-pulse duration-[8000ms]" />
 
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
@@ -122,6 +124,8 @@ const ProductDetail = () => {
             )}
             <button
               onClick={toggleWishlist}
+              aria-label="Toggle wishlist"
+              aria-pressed={isWishlisted}
               className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2 sm:p-2.5 rounded-full bg-zinc-950/80 backdrop-blur border border-zinc-800 text-zinc-300 hover:text-red-400 transition-all duration-200 cursor-pointer"
             >
               <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-400 text-red-400" : ""}`} />
@@ -149,7 +153,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="text-xl sm:text-2xl font-black text-white pt-1">
-                Rs. {product.price}/-
+                {formatPrice(product.price)}
               </div>
 
               <Separator className="bg-zinc-800" />
@@ -157,8 +161,8 @@ const ProductDetail = () => {
               <div className="space-y-2.5 sm:space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Key Features</p>
                 <div className="grid grid-cols-1 gap-2">
-                  {product.features.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-zinc-300">
+                  {product.features.map((feature) => (
+                    <div key={feature} className="flex items-center gap-2 text-xs text-zinc-300">
                       <div className="p-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
                         <Check className="w-3 h-3" />
                       </div>
@@ -171,43 +175,47 @@ const ProductDetail = () => {
 
             <div className="space-y-4 pt-3 sm:pt-4 border-t border-zinc-800">
               {/* Quantity controls */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Quantity</span>
-                <div className="flex items-center gap-3 bg-zinc-950/60 border border-zinc-800 rounded-xl px-2 py-1">
-                  <button
-                    onClick={handleDecrease}
-                    disabled={quantity <= 1}
-                    className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 cursor-pointer"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-sm font-bold text-white w-6 text-center select-none">{quantity}</span>
-                  <button
-                    onClick={handleIncrease}
-                    disabled={quantity >= 10}
-                    className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+              {!isAdmin && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Quantity</span>
+                  <div className="flex items-center gap-3 bg-zinc-950/60 border border-zinc-800 rounded-xl px-2 py-1">
+                    <button
+                      onClick={handleDecrease}
+                      disabled={quantity <= 1}
+                      className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 cursor-pointer"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-sm font-bold text-white w-6 text-center select-none">{quantity}</span>
+                    <button
+                      onClick={handleIncrease}
+                      disabled={quantity >= 10}
+                      className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleAddToCart}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold h-11 rounded-xl shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Cart
-                </Button>
-              </div>
+              {!isAdmin && (
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleAddToCart}
+                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold h-11 rounded-xl shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    Add to Cart
+                  </Button>
+                </div>
+              )}
 
               {/* Delivery / Guarantee */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 pt-1">
                 <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                   <Truck className="w-4 h-4 text-zinc-600 shrink-0" />
-                  <span>Free shipping above Rs. 999</span>
+                  <span>Free shipping above ₹999</span>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] text-zinc-500">
                   <ShieldCheck className="w-4 h-4 text-zinc-600 shrink-0" />

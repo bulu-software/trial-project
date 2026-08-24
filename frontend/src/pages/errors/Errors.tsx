@@ -14,7 +14,7 @@ import {
 
 export function NotFound() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden">
+    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden isolate">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-500/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
       
       <Card className="max-w-md w-full bg-zinc-900/40 border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 text-center relative overflow-hidden">
@@ -29,16 +29,16 @@ export function NotFound() {
             <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2.5 py-0.5 font-semibold rounded-full">
               404 • Page Not Found
             </Badge>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Lost in the Jungle?</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Lost in PlantShop?</h1>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-sm mx-auto">
-              The page you're looking for doesn't exist or may have been moved to another spot in the greenhouse.
+              The page you're looking for doesn't exist or may have been moved to another spot in PlantShop.
             </p>
           </div>
 
           <Link to="/" className="w-full">
             <Button className="w-full h-10 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-xs">
               <Home className="w-4 h-4" />
-              Return to Greenhouse
+              Return to PlantShop
             </Button>
           </Link>
         </CardContent>
@@ -49,7 +49,7 @@ export function NotFound() {
 
 export function ServerError() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden">
+    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden isolate">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-red-500/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
       
       <Card className="max-w-md w-full bg-zinc-900/40 border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 text-center relative overflow-hidden">
@@ -85,7 +85,7 @@ export function ServerError() {
 
 export function Unauthorized() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden">
+    <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden isolate">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-amber-500/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
       
       <Card className="max-w-md w-full bg-zinc-900/40 border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 text-center relative overflow-hidden">
@@ -140,7 +140,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden">
+        <div className="min-h-[80vh] flex items-center justify-center bg-zinc-950 text-white px-4 relative overflow-hidden isolate">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-red-500/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
           
           <Card className="max-w-md w-full bg-zinc-900/40 border-zinc-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 text-center relative overflow-hidden">
