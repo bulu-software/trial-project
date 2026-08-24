@@ -146,6 +146,46 @@ export const api = {
     });
   },
 
+  async sendOtp(data: { email: string }) {
+    return request<{ message: string }>("/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async verifyOtp(data: { email: string; otp: string }) {
+    return request<{ message: string; verified?: boolean }>("/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async resetPasswordOtp(data: { email: string; otp: string; new_password: string }) {
+    return request<{ message: string }>("/auth/reset-password-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async resetPassword(data: { token: string; new_password: string }) {
+    return request<{ message: string }>("/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getCustomers(token?: string): Promise<{ id: number; name: string; email: string; role: string; phone?: string; address?: string; joined?: string; orders?: number }[]> {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return request("/auth/customers", { headers });
+  },
+
   // Products
   async getProducts(category?: string) {
     const endpoint = category && category !== "All"
@@ -197,5 +237,45 @@ export const api = {
       method: "DELETE",
     });
   },
+
+  // Orders
+  async getOrders(): Promise<Order[]> {
+    try {
+      return await request<Order[]>("/orders");
+    } catch {
+      return [];
+    }
+  },
+
+  async updateOrderStatus(id: string, status: string) {
+    return request<{ message: string }>(`/orders/${id}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  async deleteOrder(id: string) {
+    return request<{ message: string }>(`/orders/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
+
+export interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  items: OrderItem[];
+  total: number;
+  status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
+}
 

@@ -6,7 +6,6 @@ import {
   ShoppingCart,
   Users,
   Tag,
-  Settings,
   ShieldCheck,
   UserCircle,
   Plus,
