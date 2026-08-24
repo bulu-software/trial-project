@@ -57,13 +57,11 @@ const Forgot_password = () => {
     setIsLoading(true)
 
     try {
-      const res = await api.sendOtp({ email })
-      console.log("%c[Send OTP Response]", "color: #10b981; font-weight: bold;", res)
+      await api.sendOtp({ email })
       toast.success("OTP Sent!", { description: `Verification code sent to ${email}` })
       setStep(2)
       setResendCooldown(30)
     } catch (err: unknown) {
-      console.error("%c[Send OTP Error]", "color: #ef4444; font-weight: bold;", err)
       const msg = err instanceof Error ? err.message : "Failed to send OTP code"
       setError(msg)
     } finally {
@@ -121,12 +119,10 @@ const Forgot_password = () => {
     setIsLoading(true)
 
     try {
-      const res = await api.verifyOtp({ email, otp: fullOtp })
-      console.log("%c[Verify OTP Response]", "color: #10b981; font-weight: bold;", res)
+      await api.verifyOtp({ email, otp: fullOtp })
       toast.success("OTP Verified!", { description: "Please enter your new password." })
       setStep(3)
     } catch (err: unknown) {
-      console.error("%c[Verify OTP Error]", "color: #ef4444; font-weight: bold;", err)
       const msg = err instanceof Error ? err.message : "Invalid or expired OTP code"
       setError(msg)
     } finally {
@@ -173,16 +169,14 @@ const Forgot_password = () => {
 
     try {
       const fullOtp = otp.join("")
-      const res = await api.resetPasswordOtp({
+      await api.resetPasswordOtp({
         email,
         otp: fullOtp,
         new_password: newPassword,
       })
-      console.log("%c[Reset Password Response]", "color: #10b981; font-weight: bold;", res)
       toast.success("Password Reset Successful", { description: "You can now log in with your new password." })
       setStep("success")
     } catch (err: unknown) {
-      console.error("%c[Reset Password Error]", "color: #ef4444; font-weight: bold;", err)
       const msg = err instanceof Error ? err.message : "Failed to reset password"
       setError(msg)
     } finally {
@@ -251,8 +245,11 @@ const Forgot_password = () => {
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@example.com"
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      setError("")
+                    }}
+                    placeholder="you@example.com"
                     className="border-glow pl-10 h-10 border-border/60 bg-input/20 focus-visible:border-emerald-500/50 focus-visible:ring-emerald-500/20 rounded-xl"
                     disabled={isLoading}
                     required
@@ -292,12 +289,14 @@ const Forgot_password = () => {
                       ref={(el) => { otpInputsRef.current[idx] = el; }}
                       type="text"
                       inputMode="numeric"
+                      autoComplete="one-time-code"
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                       disabled={isLoading}
                       className="w-10 h-12 text-center text-lg font-bold bg-zinc-900/90 border border-zinc-700/80 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all text-white"
+                      aria-label={`OTP Digit ${idx + 1}`}
                     />
                   ))}
                 </div>
@@ -365,6 +364,7 @@ const Forgot_password = () => {
                   <button
                     type="button"
                     onClick={() => setShowNewPassword((prev) => !prev)}
+                    aria-label={showNewPassword ? "Hide password" : "Show password"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -393,6 +393,7 @@ const Forgot_password = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

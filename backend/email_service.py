@@ -235,5 +235,44 @@ def send_otp_email(to_email: str, user_name: str, otp_code: str) -> bool:
 
 
 def send_reset_password_email(to_email: str, user_name: str, reset_token: str) -> bool:
-    """Send a password reset email (alias that calls send_otp_email or sends reset link)."""
-    return send_otp_email(to_email, user_name, reset_token[:6])
+    """Send a password reset email with the full reset link."""
+    reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+    logger.info(f"🔗 RESET LINK GENERATED FOR: {to_email}")
+    logger.info(f"🔗 URL: {reset_link}")
+
+    if not SMTP_USER or not SMTP_PASSWORD:
+        logger.warning("⚠️ SMTP credentials not configured. Reset link logged to console.")
+        return True
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = "Reset Your PlantShop Password"
+        msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+        msg["To"] = to_email
+
+        plain_text = (
+            f"Hello {user_name},\n\n"
+            f"We received a request to reset your PlantShop password.\n\n"
+            f"Click the link below to set a new password:\n{reset_link}\n\n"
+            f"This link will expire in {RESET_TOKEN_EXPIRE_MINUTES} minutes.\n"
+            f"If you did not request this, you can safely ignore this email.\n"
+        )
+        msg.attach(MIMEText(plain_text, "plain"))
+
+        if SMTP_PORT == 465:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+        else:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(SMTP_FROM_EMAIL, [to_email], msg.as_string())
+
+        logger.info(f"✅ Reset password email successfully sent to {to_email}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Failed to send reset password email: {e}")
+        return False

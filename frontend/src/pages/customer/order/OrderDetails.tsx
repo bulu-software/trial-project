@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/forms/button"
 import { Separator } from "@/components/ui/display/separator"
 import { Badge } from "@/components/ui/display/badge"
 import { Package, MapPin, CheckCircle2, Circle, ArrowLeft, Star } from "lucide-react"
-import { dummyOrders, type OrderItem } from "@/data/orders-data"
+import { dummyOrders, type Order, type OrderItem } from "@/data/orders-data"
 
 const trackingSteps = ["Order Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"]
 
-const getSavedOrders = () => {
+const getSavedOrders = (): Order[] => {
   const saved = localStorage.getItem("my-orders")
   return saved ? JSON.parse(saved) : dummyOrders
 }
@@ -17,7 +17,7 @@ const getSavedOrders = () => {
 const OrderDetails = () => {
   const { id } = useParams()
 
-  const [allOrders, setAllOrders] = useState(() => getSavedOrders())
+  const [allOrders, setAllOrders] = useState<Order[]>(() => getSavedOrders())
   const [reviewOpenId, setReviewOpenId] = useState<number | null>(null)
 
   useEffect(() => {

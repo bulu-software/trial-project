@@ -60,14 +60,12 @@ const Reset_password = () => {
         token,
         new_password: password,
       })
-      console.log("%c[Reset Password Response]", "color: #10b981; font-weight: bold; font-size: 13px;", res)
 
       setIsSuccess(true)
       toast.success("Password Reset Successful", {
         description: res.message || "You can now log in with your new password.",
       })
     } catch (err: unknown) {
-      console.error("%c[Reset Password Error]", "color: #ef4444; font-weight: bold;", err)
       const msg = err instanceof Error ? err.message : "Failed to reset password. The link might have expired."
       setError(msg)
       toast.error("Password Reset Failed", {
@@ -133,8 +131,8 @@ const Reset_password = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
@@ -165,8 +163,8 @@ const Reset_password = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    tabIndex={-1}
                   >
                     {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>

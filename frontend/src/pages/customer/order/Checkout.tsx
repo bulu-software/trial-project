@@ -10,8 +10,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/layout/radio-group"
 import { Minus, Plus, MapPin, Wallet, ShoppingBag, Tag, X } from "lucide-react"
 import { toast } from "sonner"
 
+interface Coupon {
+  code: string;
+  type: "percent" | "flat";
+  value: number;
+  label: string;
+}
+
 // TEMP: replace with real coupon lookup (API / Coupon_management data) once available
-const AVAILABLE_COUPONS = {
+const AVAILABLE_COUPONS: Record<string, { type: "percent" | "flat"; value: number; label: string }> = {
   SAVE10: { type: "percent", value: 10, label: "10% off" },
   SAVE20: { type: "percent", value: 20, label: "20% off" },
   FLAT50: { type: "flat", value: 50, label: "₹50 off" },
@@ -32,7 +39,7 @@ const Checkout = () => {
 
   // coupon state
   const [couponCode, setCouponCode] = useState("")
-  const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
 
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase()

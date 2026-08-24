@@ -9,6 +9,7 @@ import Register from "@/pages/auth/Registration"
 import Footer from "@/components/ui/layout/footer"
 import ProductPage from "@/pages/shared/Product"
 import Forgot_password from "@/pages/auth/Forgot_password"
+import Reset_password from "@/pages/auth/Reset_password"
 import { Toaster } from "@/components/ui/feedback/sonner"
 import { 
   Home as HomeIcon, 
@@ -238,6 +239,7 @@ const AppContent = () => {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/recently-viewed" element={<Recently_View />} />
           <Route path="/forgot-password" element={<Forgot_password/>} />
+          <Route path="/reset-password" element={<Reset_password />} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/change-password" element={<Change_password/>} />
           <Route path="/dashboard" element={<Dashboard/>} />
