@@ -12,7 +12,7 @@ const Footer = () => {
       <div className="max-w-5xl mx-auto w-full flex flex-col gap-5">
         
         {/* Row 1: Logo Left, Nav Links Right */}
-        <div className="flex flex-row items-center justify-between w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
           <div className="flex items-center gap-2 text-white group cursor-pointer">
             <Leaf className="size-5 text-emerald-400 fill-emerald-400/10 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
@@ -42,8 +42,8 @@ const Footer = () => {
         <div className="w-full h-[1px] bg-gradient-to-r from-emerald-500/5 via-border/40 to-emerald-500/5" />
 
         {/* Row 2: Copyright Left, Socials Right */}
-        <div className="flex flex-row items-center justify-between w-full text-xs text-muted-foreground/75">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 w-full text-xs text-muted-foreground/75 text-center sm:text-left">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1">
             <span>© {new Date().getFullYear()} PlantShop Inc.</span>
             <span className="hidden sm:inline text-muted-foreground/20">•</span>
             <Link to="/privacy-policy" className="hover:text-emerald-400 transition-colors duration-200">
@@ -55,7 +55,7 @@ const Footer = () => {
             </Link>
           </div>
 
-          {/* Social Icons (Minimal Inline SVGs) */}
+          {/* Social Icons */}
           <div className="flex items-center gap-5">
             <a
               href="#instagram"
