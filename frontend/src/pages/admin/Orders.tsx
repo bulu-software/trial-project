@@ -83,6 +83,7 @@ const Orders = () => {
   const isAdmin = localStorage.getItem("role") === "admin";
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [timeFilter, setTimeFilter] = useState<string>("All Time");
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
   const handleStatusChange = (id: string, newStatus: Order["status"]) => {
     setOrders((prev) =>
@@ -91,9 +92,12 @@ const Orders = () => {
     toast.success(`Order ${id} updated to ${newStatus}`);
   };
 
-  const handleDeleteOrder = (id: string) => {
-    setOrders((prev) => prev.filter((order) => order.id !== id));
-    toast.success(`Order ${id} deleted`);
+  const confirmDeleteOrder = () => {
+    if (orderToDelete) {
+      setOrders((prev) => prev.filter((order) => order.id !== orderToDelete));
+      toast.success(`Order ${orderToDelete} deleted`);
+      setOrderToDelete(null);
+    }
   };
 
   const filteredOrders = useMemo(() => {
@@ -119,7 +123,11 @@ const Orders = () => {
     });
   }, [orders, timeFilter]);
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  // Exclude cancelled orders from revenue
+  const totalRevenue = filteredOrders
+    .filter((o) => o.status !== "Cancelled")
+    .reduce((sum, o) => sum + o.total, 0);
+
   const pendingCount = filteredOrders.filter((o) => o.status === "Pending").length;
   const deliveredCount = filteredOrders.filter((o) => o.status === "Delivered").length;
 
@@ -271,7 +279,8 @@ const Orders = () => {
                       <option value="Cancelled">Cancelled</option>
                     </select>
                     <button
-                      onClick={() => handleDeleteOrder(order.id)}
+                      onClick={() => setOrderToDelete(order.id)}
+                      aria-label={`Delete order ${order.id}`}
                       className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -283,6 +292,37 @@ const Orders = () => {
           })
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-bold text-white">Delete Order?</h3>
+              <p className="text-xs text-zinc-400">
+                Are you sure you want to delete order <span className="font-semibold text-white">{orderToDelete}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setOrderToDelete(null)}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteOrder}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors cursor-pointer shadow-lg shadow-red-500/20"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

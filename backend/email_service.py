@@ -3,7 +3,7 @@ import smtplib
 import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 from dotenv import load_dotenv
@@ -31,7 +31,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 def create_reset_token(email: str, expires_minutes: int = RESET_TOKEN_EXPIRE_MINUTES) -> str:
     """Generate a signed JWT token specifically for password reset."""
-    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
     payload = {
         "sub": email,
         "type": "reset_password",
@@ -185,15 +185,11 @@ def get_otp_html_template(user_name: str, otp_code: str) -> str:
 
 def send_otp_email(to_email: str, user_name: str, otp_code: str) -> bool:
     """Send a 6-digit OTP email to the user's registered email address."""
-    logger.info(f"============================================================")
-    logger.info(f"🔢 OTP CODE GENERATED FOR: {to_email}")
-    logger.info(f"🔑 OTP CODE: {otp_code}")
-    logger.info(f"⏱️ EXPIRES IN: {OTP_EXPIRE_MINUTES} minutes")
-    logger.info(f"============================================================")
+    logger.info(f"📧 Preparing OTP verification email for: {to_email}")
 
     if not SMTP_USER or not SMTP_PASSWORD:
         logger.warning(
-            "⚠️ SMTP credentials are not set in .env! OTP code was logged to console above."
+            f"⚠️ SMTP credentials not set in .env! DEV OTP CODE for {to_email}: {otp_code}"
         )
         return True
 
