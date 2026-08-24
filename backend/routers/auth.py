@@ -1,6 +1,6 @@
 import secrets
-from typing import List
-from datetime import datetime, timedelta
+from typing import List, Optional
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from database import get_db
@@ -144,7 +144,7 @@ def send_otp(
     
     # Cryptographically secure 6-digit numeric OTP
     otp_code = f"{secrets.randbelow(1000000):06d}"
-    expires_at = datetime.utcnow() + timedelta(minutes=10)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     
     OTP_STORE[email_clean] = {
         "otp": otp_code,
@@ -167,7 +167,7 @@ def verify_otp(data: schemas.VerifyOTPRequest):
             detail="No OTP request found for this email address. Please click Send OTP first.",
         )
     
-    if datetime.utcnow() > record["expires_at"]:
+    if datetime.now(timezone.utc) > record["expires_at"]:
         OTP_STORE.pop(email_clean, None)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -203,7 +203,7 @@ def reset_password_otp(data: schemas.ResetPasswordOTPRequest, db: Session = Depe
             detail="Invalid or expired OTP session. Please request a new OTP code.",
         )
         
-    if datetime.utcnow() > record["expires_at"]:
+    if datetime.now(timezone.utc) > record["expires_at"]:
         OTP_STORE.pop(email_clean, None)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -281,15 +281,15 @@ def get_customers(
     users = db.query(models.User).all()
     result = []
     for u in users:
-        joined_str = u.created_at.strftime("%Y-%m-%d") if u.created_at else "2026-01-01"
+        joined_str = u.created_at.strftime("%Y-%m-%d") if u.created_at else None
         result.append({
             "id": u.id,
             "name": u.name,
             "email": u.email,
             "role": u.role,
-            "phone": u.phone or "N/A",
-            "address": u.address or "N/A",
+            "phone": u.phone,
+            "address": u.address,
             "joined": joined_str,
-            "orders": 1 if u.role == "customer" else 0
+            "orders": None  # Will be populated with real count when orders table is queried
         })
     return result

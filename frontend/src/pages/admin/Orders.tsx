@@ -19,7 +19,11 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [timeFilter, setTimeFilter] = useState<string>("All Time");
+<<<<<<< HEAD
   const [copiedId, setCopiedId] = useState<string | null>(null);
+=======
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+>>>>>>> 0867a66 (fix(orders): exclude cancelled orders from revenue, add delete confirmation modal, use timezone.utc, and clean OTP logs)
 
   const loadOrders = async () => {
     try {
@@ -34,6 +38,7 @@ const Orders = () => {
     }
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     loadOrders();
   }, []);
@@ -51,23 +56,33 @@ const Orders = () => {
     }
   };
 
-  const handleDeleteOrder = async (id: string) => {
-    try {
-      await api.deleteOrder(id);
-      setOrders((prev) => prev.filter((order) => order.id !== id));
-      toast.success(`Order ${id} deleted`);
-    } catch (err: unknown) {
-      console.error("Failed to delete order:", err);
-      toast.error(`Failed to delete order ${id}`);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+
+  const confirmDeleteOrder = async () => {
+    if (orderToDelete) {
+      try {
+        if ("deleteOrder" in api) {
+          await (api as any).deleteOrder(orderToDelete);
+        }
+      } catch (err: unknown) {
+        console.error("Failed to delete order from API:", err);
+      }
+      setOrders((prev) => prev.filter((order) => order.id !== orderToDelete));
+      toast.success(`Order ${orderToDelete} deleted`);
+      setOrderToDelete(null);
     }
   };
 
-  const handleCopyId = (e: React.MouseEvent, id: string) => {
+  const handleCopyId = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    toast.success("Order ID copied to clipboard!");
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopiedId(id);
+      toast.success("Order ID copied to clipboard!");
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      toast.error("Failed to copy order ID");
+    }
   };
 
   const filteredOrders = useMemo(() => {
@@ -93,7 +108,11 @@ const Orders = () => {
     });
   }, [orders, timeFilter]);
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  // Exclude cancelled orders from revenue
+  const totalRevenue = filteredOrders
+    .filter((o) => o.status !== "Cancelled")
+    .reduce((sum, o) => sum + o.total, 0);
+
   const pendingCount = filteredOrders.filter((o) => o.status === "Pending").length;
   const deliveredCount = filteredOrders.filter((o) => o.status === "Delivered").length;
 
@@ -193,9 +212,15 @@ const Orders = () => {
                   {/* Order ID with Copy Action */}
                   <div className="col-span-2 flex items-center gap-1.5 min-w-0">
                     <button
+<<<<<<< HEAD
                       onClick={(e) => handleCopyId(e, order.id)}
                       className="group flex items-center gap-1.5 font-mono text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-500/20 transition-all cursor-pointer truncate max-w-full"
                       title="Click to copy Order ID"
+=======
+                      onClick={() => setOrderToDelete(order.id)}
+                      aria-label={`Delete order ${order.id}`}
+                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
+>>>>>>> 0867a66 (fix(orders): exclude cancelled orders from revenue, add delete confirmation modal, use timezone.utc, and clean OTP logs)
                     >
                       <span className="truncate">{order.id}</span>
                       {isCopied ? (
@@ -324,7 +349,8 @@ const Orders = () => {
                         <option value="Cancelled">Cancelled</option>
                       </select>
                       <button
-                        onClick={() => handleDeleteOrder(order.id)}
+                        onClick={() => setOrderToDelete(order.id)}
+                        aria-label={`Delete order ${order.id}`}
                         className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer border border-red-500/20"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -337,6 +363,37 @@ const Orders = () => {
           })
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-bold text-white">Delete Order?</h3>
+              <p className="text-xs text-zinc-400">
+                Are you sure you want to delete order <span className="font-semibold text-white">{orderToDelete}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setOrderToDelete(null)}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-white transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteOrder}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors cursor-pointer shadow-lg shadow-red-500/20"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
