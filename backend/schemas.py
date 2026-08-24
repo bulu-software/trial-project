@@ -45,6 +45,35 @@ class ProfileUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
 
+class SendOTPRequest(BaseModel):
+    email: EmailStr
+
+class VerifyOTPRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+class ResetPasswordOTPRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+
+class CustomerResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str
+    phone: Optional[str] = "N/A"
+    address: Optional[str] = "N/A"
+    joined: Optional[str] = None
+    orders: Optional[int] = 0
+
+    class Config:
+        from_attributes = True
+
 # Product Schemas
 class ProductBase(BaseModel):
     name: str

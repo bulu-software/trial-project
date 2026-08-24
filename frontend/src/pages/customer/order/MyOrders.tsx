@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/forms/button"
 import { Badge } from "@/components/ui/display/badge"
 import { Package, Star, CheckCircle2, Truck, XCircle } from "lucide-react"
 import { useState, useEffect } from "react"
-import { dummyOrders } from "@/data/orders-data"
+import { dummyOrders, type Order } from "@/data/orders-data"
 
 const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2 }> = {
   Delivered: { color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", icon: CheckCircle2 },
@@ -13,7 +13,7 @@ const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2 }>
 }
 
 const MyOrders = () => {
-  const [orders, setOrders] = useState(() => {
+  const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem("my-orders")
     return saved ? JSON.parse(saved) : dummyOrders
   })
