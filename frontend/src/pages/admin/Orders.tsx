@@ -19,11 +19,8 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [timeFilter, setTimeFilter] = useState<string>("All Time");
-<<<<<<< HEAD
   const [copiedId, setCopiedId] = useState<string | null>(null);
-=======
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
->>>>>>> 0867a66 (fix(orders): exclude cancelled orders from revenue, add delete confirmation modal, use timezone.utc, and clean OTP logs)
 
   const loadOrders = async () => {
     try {
@@ -38,7 +35,6 @@ const Orders = () => {
     }
   };
 
-<<<<<<< HEAD
   useEffect(() => {
     loadOrders();
   }, []);
@@ -55,8 +51,6 @@ const Orders = () => {
       toast.error(`Failed to update status for order ${id}`);
     }
   };
-
-  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
 
   const confirmDeleteOrder = async () => {
     if (orderToDelete) {
@@ -200,7 +194,7 @@ const Orders = () => {
           </div>
         ) : (
           filteredOrders.map((order, index) => {
-            const config = statusConfig[order.status] || statusConfig["Pending"];
+            const config = statusConfig[order.status as keyof typeof statusConfig] || statusConfig["Pending"];
             const StatusIcon = config.icon;
             const isCopied = copiedId === order.id;
 
@@ -212,15 +206,10 @@ const Orders = () => {
                   {/* Order ID with Copy Action */}
                   <div className="col-span-2 flex items-center gap-1.5 min-w-0">
                     <button
-<<<<<<< HEAD
                       onClick={(e) => handleCopyId(e, order.id)}
                       className="group flex items-center gap-1.5 font-mono text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-500/20 transition-all cursor-pointer truncate max-w-full"
                       title="Click to copy Order ID"
-=======
-                      onClick={() => setOrderToDelete(order.id)}
-                      aria-label={`Delete order ${order.id}`}
-                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
->>>>>>> 0867a66 (fix(orders): exclude cancelled orders from revenue, add delete confirmation modal, use timezone.utc, and clean OTP logs)
+                      aria-label={`Copy order ID ${order.id}`}
                     >
                       <span className="truncate">{order.id}</span>
                       {isCopied ? (
@@ -288,9 +277,10 @@ const Orders = () => {
                         <option value="Cancelled">Cancelled</option>
                       </select>
                       <button
-                        onClick={() => handleDeleteOrder(order.id)}
+                        onClick={() => setOrderToDelete(order.id)}
                         className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer border border-red-500/20"
                         title="Delete order"
+                        aria-label={`Delete order ${order.id}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

@@ -18,8 +18,8 @@ interface Customer {
   role: string;
   phone?: string;
   address?: string;
-  joined: string;
-  orders: number;
+  joined?: string;
+  orders?: number;
 }
 
 const CustomersPage = () => {
@@ -43,10 +43,8 @@ const CustomersPage = () => {
     setError("");
     try {
       const data = await api.getCustomers();
-      console.log("%c[Customers API Response]", "color: #10b981; font-weight: bold; font-size: 13px;", data);
       setCustomerList(data);
     } catch (err: unknown) {
-      console.error("%c[Customers API Error]", "color: #ef4444; font-weight: bold;", err);
       const msg = err instanceof Error ? err.message : "Failed to load customers from server.";
       setError(msg);
     } finally {

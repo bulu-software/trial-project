@@ -237,5 +237,45 @@ export const api = {
       method: "DELETE",
     });
   },
+
+  // Orders
+  async getOrders(): Promise<Order[]> {
+    try {
+      return await request<Order[]>("/orders");
+    } catch {
+      return [];
+    }
+  },
+
+  async updateOrderStatus(id: string, status: string) {
+    return request<{ message: string }>(`/orders/${id}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  async deleteOrder(id: string) {
+    return request<{ message: string }>(`/orders/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
+
+export interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  items: OrderItem[];
+  total: number;
+  status: "Pending" | "Shipped" | "Delivered" | "Cancelled";
+}
 
